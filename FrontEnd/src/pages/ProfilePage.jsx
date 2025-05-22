@@ -1,47 +1,105 @@
 import React, { useEffect, useState } from 'react';
+import { FaMapMarkerAlt, FaBirthdayCake, FaBullseye, FaUser } from 'react-icons/fa';
 
 const ProfilePage = () => {
-    const [userData, setUserData] = useState(null);
-    const [activityLogs, setActivityLogs] = useState([]);
-    
-    useEffect(() => {
-        const storedUserData = localStorage.getItem("userData");
-        if (!storedUserData) return;
+  const [userData, setUserData] = useState(null);
+  const [activityLogs, setActivityLogs] = useState([]);
 
-        const { uid } = JSON.parse(storedUserData);
-        if (!uid) return;
-        // Fetch the user data (you will need to create a backend API route for this)
-        fetch(`http://localhost:5000/api/users/get-user-profile?uid=${uid}`)  // Replace with your actual backend route
-            .then((response) => response.json())
-            .then((data) => {
-                setUserData(data.user);
-                setActivityLogs(data.activityLogs); // Assuming activity logs are fetched here
-            })
-            .catch((error) => console.error('Error fetching profile data:', error));
-    }, []);
-    
+  useEffect(() => {
+    const stored = localStorage.getItem('userData');
+    if (!stored) return;
+    const { uid } = JSON.parse(stored);
+    if (!uid) return;
+
+    fetch(`http://localhost:5000/api/users/get-user-profile?uid=${uid}`)
+      .then(res => res.json())
+      .then(data => {
+        setUserData(data.user);
+        setActivityLogs(data.activityLogs || []);
+      })
+      .catch(err => console.error('Error fetching profile:', err));
+  }, []);
+
+  const renderMediaThumbnail = (url) => {
+    const isVideo = /\.(mp4|mov)$/i.test(url);
     return (
-        <div className="profile-page">
-            {userData && (
-                <>
-                    <h2>{userData.fullName}</h2>
-                    <p>Email: {userData.email}</p>
-                    <p>Age: {userData.age}</p>
-                    <p>Location: {userData.location?.city} , {userData.location?.state}, {userData.location?.country}</p>
-                    <p>Bio: {userData.shortBio}</p>
-                    <img src={userData.profilePicture || "/greenSpartan.png"} alt="Profile" />
-                    <p>Sustainability Goal: {userData.sustainabilityGoal}</p>
-
-                    <div className="activity-logs">
-                        <h3>Activity Logs:</h3>
-                        {activityLogs.map((log) => (
-                            <div key={log.id}>{log.description}</div>
-                        ))}
-                    </div>
-                </>
-            )}
-        </div>
+      <div className="relative w-48 h-28 rounded-lg overflow-hidden bg-gray-100">
+        {isVideo ? (
+          <video
+            src={url}
+            muted
+            autoPlay
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={url}
+            alt="media"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+      </div>
     );
+  };
+
+  if (!userData) return null;
+
+  return (
+    <div className="max-w-3xl mx-auto p-6 mt-10 bg-white rounded-2xl shadow-lg">
+      {/* Profile Header */}
+      <div className="flex items-center space-x-6 pb-6 border-b">
+        <div className="relative">
+          <img
+            src={userData.profilePicture || '/greenSpartan.png'}
+            alt="Profile"
+            className="w-32 h-32 rounded-full border-4 border-green-500 object-cover"
+          />
+          <div className="absolute bottom-0 right-0 bg-green-600 p-2 rounded-full border-2 border-white">
+            <FaUser className="text-white" />
+          </div>
+        </div>
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800">{userData.fullName}</h2>
+          <p className="text-gray-600">{userData.email}</p>
+          <div className="flex items-center space-x-4 mt-2 text-gray-500">
+            <p className="flex items-center space-x-1"><FaBirthdayCake /> <span>{userData.age} yrs</span></p>
+            <p className="flex items-center space-x-1"><FaMapMarkerAlt /> <span>{userData.location?.city}</span></p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bio and Goals */}
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="p-4 bg-green-50 rounded-xl">
+          <h3 className="font-semibold text-gray-700 mb-2"><FaBullseye className="inline mr-2" />Goal</h3>
+          <p className="text-gray-800">{userData.sustainabilityGoal}</p>
+        </div>
+        <div className="p-4 bg-green-50 rounded-xl">
+          <h3 className="font-semibold text-gray-700 mb-2"><FaUser className="inline mr-2" />Bio</h3>
+          <p className="text-gray-800">{userData.shortBio}</p>
+        </div>
+      </div>
+
+      {/* Activity Logs */}
+      <div className="mt-10">
+        <h3 className="text-2xl font-semibold mb-4 text-green-700">Activity Logs</h3>
+        <div className="space-y-4">
+          {activityLogs.length > 0 ? (
+            activityLogs.map(log => (
+              <div key={log._id} className="flex justify-between items-start bg-gray-50 p-4 rounded-xl shadow-sm">
+                <p className="text-gray-800 flex-1 pr-4">{log.description}</p>
+                {log.media?.[0] && renderMediaThumbnail(log.media[0])}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No activity logs yet.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ProfilePage;

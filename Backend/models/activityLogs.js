@@ -5,6 +5,11 @@ const activityLogSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    category: {
+        type : String ,
+        required : true
+    } ,
+    points: Number,
     description: { 
         type: String, 
         required: true 

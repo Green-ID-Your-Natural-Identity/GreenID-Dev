@@ -6,7 +6,9 @@ const router = express.Router();
 
 // Create Activity Log API
 router.post('/create-log' , uploadActivityMedia.array('media', 4) , async (req, res) => {
-    const { uid, description, media, location } = req.body;
+    const { uid, description, category } = req.body;
+    const location = JSON.parse(req.body.location);
+    // const points = parseInt(req.body.points) || 0;
 
     try {
         if (!uid || !description) {
@@ -14,6 +16,7 @@ router.post('/create-log' , uploadActivityMedia.array('media', 4) , async (req, 
         }
 
         const mediaUrls = req.files?.map(file => file.path);
+        console.log("Uploaded Files:", req.files);
         // Generate system time
         const currentDate = new Date();
         const readableTime = currentDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -21,6 +24,8 @@ router.post('/create-log' , uploadActivityMedia.array('media', 4) , async (req, 
         // Create a new activity log
         const newLog = new ActivityLog({
             uid,
+            category ,
+            points : 0 ,
             description,
             media : mediaUrls ,
             location,
@@ -36,7 +41,11 @@ router.post('/create-log' , uploadActivityMedia.array('media', 4) , async (req, 
         });
 
     } catch (error) {
-        res.status(500).json({ message: 'Error creating activity log', error });
+        console.error('Activity log error:', error); // 👈 Will now show full object
+        return res.status(500).json({
+            message: 'Error creating activity log',
+            error: error.message || 'Internal Server Error'
+        });
     }
 });
 
