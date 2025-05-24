@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback , useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import LogoutButton from '../components/logoutbutton';
 
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
@@ -22,13 +23,12 @@ const ActivityLogPage = () => {
   const [points, setPoints] = useState(0);
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
-  const fileInputRef = useRef(null); // <-- NEW: to reset input element
+  const fileInputRef = useRef(null);
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [errors, setErrors] = useState({});
 
-  // const stored = localStorage.getItem('userData');
-  // const { uid } = stored ? JSON.parse(stored) : {};
   const { user } = useAuth();
   const uid = user?.uid;
 
@@ -65,8 +65,26 @@ const ActivityLogPage = () => {
 
   const handleCategoryChange = e => {
     const sel = activityOptions.find(o => o.value === e.target.value);
-    setCategory(sel.value || '');
-    setPoints(sel.points || 0);
+    setCategory(sel?.value || '');
+    setPoints(sel?.points || 0);
+    if (errors.category) {
+      setErrors(prev => ({ ...prev, category: null }));
+    }
+  };
+
+  const handleDescriptionChange = e => {
+    setDescription(e.target.value);
+    if (errors.description) {
+      setErrors(prev => ({ ...prev, description: null }));
+    }
+  };
+
+  const processDescription = (text) => {
+    return text
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/(^\w|\.\s*\w)/g, (match) => match.toUpperCase())
+      .replace(/([.!?])\s*([a-z])/g, (match, punct, letter) => punct + ' ' + letter.toUpperCase());
   };
 
   const handleMediaChange = e => {
@@ -89,31 +107,43 @@ const ActivityLogPage = () => {
     }
     setMedia(files);
     setProgress(0);
+    if (errors.media) {
+      setErrors(prev => ({ ...prev, media: null }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!category) {
+      newErrors.category = 'Please select an activity category.';
+      toast.error('Please select an activity category.');
+    }
+    
+    if (!description.trim()) {
+      newErrors.description = 'Please fill out the description.';
+      toast.error('Please fill out the description.');
+    }
+
+    if (media.length === 0) {
+      newErrors.media = 'Please upload at least one media file.';
+      toast.error('Please upload at least one media file.');
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    console.log({ category, description, mediaLength: media.length });
-
-    if (!category) {
-      return toast.error('Please select an activity category.');
-      // return;
-    }
     
-    if (!description.trim()) {
-      toast.error('Please fill out the Description');
-      return;
-    }
-
-    if (media.length === 0) {
-      toast.error('Please upload at least one media file.');
-      await new Promise(res => setTimeout(res, 50));
+    if (!validateForm()) {
       return;
     }
 
     const form = new FormData();
     form.append('uid', uid);
-    form.append('description', description);
+    form.append('description', processDescription(description));
     form.append('category', category);
     form.append('points', points);
     form.append('location', JSON.stringify(location));
@@ -129,12 +159,15 @@ const ActivityLogPage = () => {
           onUploadProgress: e => setProgress(Math.round((e.loaded * 100) / e.total))
         }
       );
-      toast.success('Activity logged successfully!');
+      toast.success('🎉 Activity logged successfully!');
+      
       setDescription('');
       setCategory('');
       setPoints(0);
       setMedia([]);
-      if(fileInputRef.current) fileInputRef.current.value = '' ; // it clears the file name from input
+      setErrors({});
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      
       fetchLogs();
     } catch (err) {
       console.error('Upload error:', err);
@@ -142,134 +175,319 @@ const ActivityLogPage = () => {
       toast.error(msg || 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
+      setProgress(0);
+    }
+  };
+
+  const removeMedia = (indexToRemove) => {
+    setMedia(media.filter((_, i) => i !== indexToRemove));
+  };
+
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Recently';
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Recently';
     }
   };
 
   const isVideo = url => /\.(mp4|mov)$/i.test(url);
-  if (!user) return <p className="text-center mt-10">Access Denied</p>;
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="bg-white p-8 rounded-2xl shadow-xl">
+          <p className="text-xl text-gray-700">🔒 Access Denied</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg">
-       {user && <Logoutbutton />}
-      <h2 className="text-3xl font-bold mb-6 text-center text-green-700">📝 Log New Activity</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <select
-          className="w-full border text-black border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-green-300 text-lg"
-          value={category}
-          onChange={handleCategoryChange}
-          required
-        >
-          <option value="" disabled>
-            Select Activity Category
-          </option>
-          {activityOptions.map(o => (
-            <option key={o.value} value={o.value}>
-              {o.label} (+{o.points} pts)
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          className="w-full border text-black border-gray-300 rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-300 resize-y h-32 text-lg"
-          placeholder="What did you do today?"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          required
-        />
-
-        <div>
-          <label className="block mb-2 font-medium text-gray-700">Select Media</label>
-          <input
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            ref={fileInputRef}
-            onChange={handleMediaChange}
-            disabled={uploading}
-            className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-              file:rounded-xl file:border-0
-              file:text-sm file:font-semibold
-              file:bg-green-100 file:text-green-700
-              hover:file:bg-green-200"
-          />
-        </div>
-
-        {media.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {media.map((f, idx) => {
-              const url = URL.createObjectURL(f);
-              return (
-                <div key={idx} className="relative group">
-                  {f.type.startsWith('video/') ? (
-                    <video src={url} className="w-full h-32 object-cover rounded-xl" />
-                  ) : (
-                    <img src={url} className="w-full h-32 object-cover rounded-xl" />
-                  )}
-                  <button
-                    type="submit"
-                    onClick={() => setMedia(media.filter((_, i) => i !== idx))}
-                    className="absolute top-2 right-2 bg-red-500 bg-opacity-80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                  >
-                    ✕
-                  </button>
-                </div>
-              );
-            })}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {user && (
+          <div className="flex justify-end mb-6">
+            <LogoutButton />
           </div>
         )}
-
-        {uploading && (
-          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-            <div
-              className="h-full bg-green-500 transition-width"
-              style={{ width: `${progress}%` }}
-            />
+        
+        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-bold text-green-600 mb-3">
+              📝 Log New Activity
+            </h2>
+            <p className="text-gray-600 text-lg">Make a positive impact and earn points!</p>
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={uploading || media.length === 0}
-          className={`w-full py-4 rounded-2xl text-xl font-bold text-white shadow-md transform transition
-            ${uploading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-green-600 hover:bg-green-700 hover:scale-105'}
-          `}
-        >
-          {uploading ? `Uploading ${progress}%…` : 'Log Activity'}
-        </button>
-      </form>
-
-      <div className="mt-10">
-        <h3 className="text-2xl font-semibold mb-4 text-green-700">📜 Past Logs</h3>
-        {logs.length > 0 ? (
-          [...logs].reverse().map(log => (
-            <div key={log._id} className="bg-green-50 border text-black border-green-200 rounded-xl p-6 mb-6 shadow-sm">
-              <p className="text-lg"><strong>Category:</strong> {log.category}</p>
-              <p className="text-lg"><strong>Description:</strong> {log.description}</p>
-              <p className="text-gray-600"><strong>Points:</strong> {log.points}</p>
-              <p className="text-gray-500 text-sm"><strong>When:</strong> {log.logTime}</p>
-              {log.media?.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-                  {log.media.map((url, idx) =>
-                    isVideo(url) ? (
-                      <video key={idx} src={url} controls className="w-full h-32 object-cover rounded-xl" />
-                    ) : (
-                      <img
-                        key={idx}
-                        src={url}
-                        alt="activity media"
-                        className="w-full h-32 object-cover rounded-xl"
-                      />
-                    )
-                  )}
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">Activity Category</label>
+              <select
+                className={`w-full border-2 ${errors.category ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-green-500'} 
+                  rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 text-lg bg-white text-gray-800
+                  transition-all duration-200 hover:border-green-400`}
+                value={category}
+                onChange={handleCategoryChange}
+                required
+              >
+                <option value="" disabled>
+                  🌍 Select Activity Category
+                </option>
+                {activityOptions.map(o => (
+                  <option key={o.value} value={o.value}>
+                    {o.label} (+{o.points} pts)
+                  </option>
+                ))}
+              </select>
+              {errors.category && (
+                <p className="text-red-500 text-sm flex items-center">
+                  <span className="text-red-400 mr-1">⚠️</span>
+                  {errors.category}
+                </p>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-gray-600">No logs yet.</p>
-        )}
+
+            {points > 0 && (
+              <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200 rounded-2xl p-4">
+                <p className="text-green-800 font-semibold flex items-center">
+                  <span className="text-green-600 mr-2">🏆</span>
+                  You'll earn <span className="font-bold mx-1">{points}</span> points for this activity!
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">Description</label>
+              <textarea
+                className={`w-full border-2 ${errors.description ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-green-500'} 
+                  rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 resize-y h-32 text-lg bg-white text-gray-800
+                  transition-all duration-200 hover:border-green-400`}
+                placeholder="Tell us about your eco-friendly activity... 🌱"
+                value={description}
+                onChange={handleDescriptionChange}
+                required
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm flex items-center">
+                  <span className="text-red-400 mr-1">⚠️</span>
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">Upload Media</label>
+              <div className={`border-2 border-dashed ${errors.media ? 'border-red-400' : 'border-gray-300'} 
+                rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  disabled={uploading}
+                  className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                    file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                    file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
+                    hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
+                    file:shadow-lg hover:file:shadow-xl"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  📷 Upload up to 4 images or videos (max 10MB each)
+                </p>
+              </div>
+              {errors.media && (
+                <p className="text-red-500 text-sm flex items-center">
+                  <span className="text-red-400 mr-1">⚠️</span>
+                  {errors.media}
+                </p>
+              )}
+            </div>
+
+            {media.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-700">Media Preview:</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {media.map((f, idx) => {
+                    const url = URL.createObjectURL(f);
+                    return (
+                      <div key={idx} className="relative group">
+                        {f.type.startsWith('video/') ? (
+                          <video 
+                            src={url} 
+                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow" 
+                          />
+                        ) : (
+                          <img 
+                            src={url} 
+                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow" 
+                          />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(idx)}
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 
+                            opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-110"
+                        >
+                          <span className="text-xs font-bold">✕</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Uploading...</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                  <div
+                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 ease-out shadow-sm"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={uploading}
+              className={`w-full py-4 rounded-2xl text-xl font-bold text-white shadow-lg transform transition-all duration-200
+                ${uploading
+                  ? 'bg-gray-400 cursor-not-allowed scale-100'
+                  : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 hover:shadow-xl active:scale-95'}
+              `}
+            >
+              {uploading ? (
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin mr-2">⏳</span>
+                  Uploading {progress}%...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center">
+                  <span className="mr-2">🚀</span>
+                  Log Activity
+                </span>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+          <div className="flex items-center mb-6">
+            <h3 className="text-3xl font-bold text-green-600">
+              📜 Past Activities
+            </h3>
+            {logs.length > 0 && (
+              <span className="ml-4 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {logs.length} {logs.length === 1 ? 'activity' : 'activities'}
+              </span>
+            )}
+          </div>
+          
+          {logs.length > 0 ? (
+            <div className="space-y-6">
+              {[...logs].reverse().map(log => (
+                <div key={log._id} className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-100 
+                  rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
+                  
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-16 h-16">
+                      {log.media?.length > 0 ? (
+                        <div className="relative">
+                          {isVideo(log.media[0]) ? (
+                            <video 
+                              src={log.media[0]} 
+                              className="w-16 h-16 object-cover rounded-xl shadow-md" 
+                            />
+                          ) : (
+                            <img
+                              src={log.media[0]}
+                              alt="activity thumbnail"
+                              className="w-16 h-16 object-cover rounded-xl shadow-md"
+                            />
+                          )}
+                          {log.media.length > 1 && (
+                            <span className="absolute -bottom-1 -right-1 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                              +{log.media.length - 1}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 bg-green-200 rounded-xl flex items-center justify-center text-2xl">
+                          🌱
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="text-xl font-bold text-green-800">{log.category}</h4>
+                          <span className="text-gray-500 text-sm">
+                            🕒 {formatDate(log.logTime)}
+                          </span>
+                        </div>
+                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold flex-shrink-0">
+                          +{log.points} pts
+                        </span>
+                      </div>
+
+                      <p className="text-gray-700 mb-3 leading-relaxed">{log.description}</p>
+                      
+                      {log.media?.length > 1 && (
+                        <div className={`grid gap-2 mt-4 ${
+                          log.media.length === 2 ? 'grid-cols-2' : 
+                          log.media.length === 3 ? 'grid-cols-3' : 
+                          'grid-cols-2'
+                        }`}>
+                          {log.media.slice(1).map((url, idx) =>
+                            isVideo(url) ? (
+                              <video 
+                                key={idx} 
+                                src={url} 
+                                controls 
+                                className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow" 
+                              />
+                            ) : (
+                              <img
+                                key={idx}
+                                src={url}
+                                alt="activity media"
+                                className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                              />
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🌱</div>
+              <p className="text-gray-600 text-lg mb-2">No activities logged yet.</p>
+              <p className="text-gray-500">Start your eco-journey by logging your first activity above!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
