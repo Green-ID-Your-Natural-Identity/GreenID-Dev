@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
     const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const Signup = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const auth = getAuth();
+    const { setUser } = useAuth() ;
 
     // Handle normal signup
     const handleSignup = async (e) => {
@@ -24,7 +26,7 @@ const Signup = () => {
                 email: email,
             };
 
-            localStorage.setItem("userData", JSON.stringify(userData));
+            setUser(userData);
             navigate("/form");  // Redirect to profile form
         } catch (err) {
             setError(err.message);
@@ -46,7 +48,8 @@ const Signup = () => {
             };
 
             // Store user data in localStorage
-            localStorage.setItem("userData", JSON.stringify(userData));
+            // localStorage.setItem("userData", JSON.stringify(userData));
+            setUser(userData) ;
 
             // Redirect to profile form
             navigate("/form");

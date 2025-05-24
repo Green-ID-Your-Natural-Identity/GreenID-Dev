@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const ProfileForm = () => {
     const navigate = useNavigate();
-    const [userData, setUserData] = useState(null);
+    const {user} = useAuth() ;
+
+    // const [userData, setUserData] = useState(null);
     const [age, setAge] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
@@ -14,27 +18,23 @@ const ProfileForm = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // Fetch userData from localStorage
-        const storedUserData = localStorage.getItem("userData");
-        if (storedUserData) {
-            setUserData(JSON.parse(storedUserData)); // Parsing JSON string to object
-        } else {
-            setError("User data not found.");
+        if( !user) {
+            toast.error("User not Found. Please login again") ;
         }
-    }, []);
+    }, [user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!userData) {
-            setError('User data not found!');
+        if (!user) {
+            toast.error('User data not found!');
             return;
         }
 
         const formData = new FormData();
-        formData.append('uid', userData.uid);
-        formData.append('fullName', userData.fullName);
-        formData.append('email', userData.email);
+        formData.append('uid', user.uid);
+        formData.append('fullName', user.fullName);
+        formData.append('email', user.email);
         formData.append('age', age);
         formData.append('city', city);
         formData.append('state', state);
@@ -54,8 +54,8 @@ const ProfileForm = () => {
 
             const data = await response.json();
             if (data.message === 'User profile updated successfully!') {
-                const onlyUID = { uid: userData.uid };
-                localStorage.setItem("userData", JSON.stringify(onlyUID));
+                // const onlyUID = { uid: user.uid };
+                // localStorage.setItem("userData", JSON.stringify(onlyUID));
                 navigate('/profile');
             } else {
                 setError(data.message);
@@ -66,89 +66,65 @@ const ProfileForm = () => {
 };
 
     return (
-        <div className="flex justify-center items-center h-[90vh] rounded w-2xl text-black bg-green-100">
-            <div className="bg-white p-8 rounded shadow-md">
-                <h2 className="text-2xl font-bold mb-6 text-center text-green-600">Complete Your Profile</h2>
-                {userData && (
-                    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            placeholder="Name"
-                            className="border p-2 rounded"
-                            value={userData.fullName} // Prefill from localStorage
-                            disabled
-                        />
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="border p-2 rounded"
-                            value={userData.email} // Prefill from localStorage
-                            disabled
-                        />
-                        <input
-                            type="number"
-                            placeholder="Age"
-                            className="border p-2 rounded"
-                            value={age}
-                            onChange={(e) => setAge(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="City"
-                            className="border p-2 rounded"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="State"
-                            className="border p-2 rounded"
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Country"
-                            className="border p-2 rounded"
-                            value={country}
-                            onChange={(e) => setCountry(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Sustainability Goal"
-                            className="border p-2 rounded"
-                            value={sustainabilityGoal}
-                            onChange={(e) => setSustainabilityGoal(e.target.value)}
-                        />
-                        <textarea
-                            placeholder="Short Bio"
-                            className="border p-2 rounded"
-                            value={shortBio}
-                            onChange={(e) => setShortBio(e.target.value)}
-                        />
-                        {/* <input
-                            type="file"
-                            onChange={(e) => setProfilePicture(e.target.files[0])}
-                        /> */}
-                        
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={(e) => {
+        <div className="flex text-black justify-center items-center min-h-screen bg-gradient-to-br from-green-100 to-green-200 py-10 px-4">
+            <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
+                <h2 className="text-3xl font-bold text-center text-green-700">🌿 Complete Your Profile</h2>
+                {user && (
+                    <form className="grid grid-cols-1 sm:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+                        <div className="col-span-2">
+                            <label className="block text-sm text-gray-700  font-semibold mb-1">Full Name</label>
+                            <input type="text" value={user.fullName} disabled className="w-full p-3 text-black border rounded-md bg-gray-100" />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Email</label>
+                            <input type="email" value={user.email} disabled className="w-full p-3 border rounded-md bg-gray-100" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Age</label>
+                            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3 border rounded-md" />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">City</label>
+                            <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className="w-full p-3 border rounded-md" />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">State</label>
+                            <input type="text" value={state} onChange={(e) => setState(e.target.value)} className="w-full p-3 border rounded-md" />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Country</label>
+                            <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full p-3 border rounded-md" />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Sustainability Goal</label>
+                            <input type="text" value={sustainabilityGoal} onChange={(e) => setSustainabilityGoal(e.target.value)} className="w-full p-3 border rounded-md" />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Short Bio</label>
+                            <textarea value={shortBio} onChange={(e) => setShortBio(e.target.value)} className="w-full p-3 border rounded-md h-28 resize-none" />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm text-gray-700 font-semibold mb-1">Profile Picture</label>
+                            <input type="file" accept="image/*" onChange={(e) => {
                                 const file = e.target.files[0];
-                                if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
-                                alert("Profile picture must be less than 5MB");
-                                return;
+                                if (file && file.size > 5 * 1024 * 1024) {
+                                    alert("Profile picture must be less than 5MB");
+                                    return;
                                 }
                                 setProfilePicFile(file);
-                            }}
-                            className="p-2 border rounded-md"
-                        />
+                            }} className="w-full border rounded-md p-2" />
+                        </div>
 
-
-                        <button type="submit" className="bg-green-500 text-white py-2 rounded hover:bg-green-600">
-                            Save Profile
-                        </button>
+                        <div className="col-span-2 text-center">
+                            <button type="submit" className="bg-green-600 text-white font-semibold py-3 px-6 rounded-md shadow hover:bg-green-700 transition duration-200">
+                                Save Profile
+                            </button>
+                        </div>
                     </form>
                 )}
                 {error && <p className="text-red-500 text-center mt-4">{error}</p>}

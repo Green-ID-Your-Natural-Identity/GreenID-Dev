@@ -1,53 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaBirthdayCake, FaBullseye, FaUser } from 'react-icons/fa';
+import Logoutbutton from '../components/logoutbutton';
+import { useAuth } from '../context/AuthContext';
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
+  const {user} = useAuth() ;
   const [activityLogs, setActivityLogs] = useState([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userData');
-    if (!stored) return;
-    const { uid } = JSON.parse(stored);
-    if (!uid) return;
+    if(!user?.uid) return ;
 
-    fetch(`http://localhost:5000/api/users/get-user-profile?uid=${uid}`)
+    // const stored = localStorage.getItem('userData');
+    // if (!stored) return;
+    // const { uid } = JSON.parse(stored);
+    // if (!uid) return;
+
+    fetch(`http://localhost:5000/api/users/get-user-profile?uid=${user.uid}`)
       .then(res => res.json())
       .then(data => {
         setUserData(data.user);
         setActivityLogs(data.activityLogs || []);
       })
       .catch(err => console.error('Error fetching profile:', err));
-  }, []);
+  }, [user]);
 
-  const renderMediaThumbnail = (url) => {
-    const isVideo = /\.(mp4|mov)$/i.test(url);
-    return (
-      <div className="relative w-48 h-28 rounded-lg overflow-hidden bg-gray-100">
-        {isVideo ? (
-          <video
-            src={url}
-            muted
-            autoPlay
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <img
-            src={url}
-            alt="media"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-      </div>
-    );
-  };
-
-  if (!userData) return null;
+  
+  if (!userData) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-6 mt-10 bg-white rounded-2xl shadow-lg">
+      {user && <Logoutbutton />}
       {/* Profile Header */}
       <div className="flex items-center space-x-6 pb-6 border-b">
         <div className="relative">
@@ -101,5 +84,30 @@ const ProfilePage = () => {
     </div>
   );
 };
+
+const renderMediaThumbnail = (url) => {
+    const isVideo = /\.(mp4|mov)$/i.test(url);
+    return (
+      <div className="relative w-48 h-28 rounded-lg overflow-hidden bg-gray-100">
+        {isVideo ? (
+          <video
+            src={url}
+            muted
+            autoPlay
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={url}
+            alt="media"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+      </div>
+    );
+  };
+
 
 export default ProfilePage;

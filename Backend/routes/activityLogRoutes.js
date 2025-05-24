@@ -16,7 +16,7 @@ router.post('/create-log' , uploadActivityMedia.array('media', 4) , async (req, 
         }
 
         const mediaUrls = req.files?.map(file => file.path);
-        console.log("Uploaded Files:", req.files);
+        // console.log("Uploaded Files:", req.files);
         // Generate system time
         const currentDate = new Date();
         const readableTime = currentDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });

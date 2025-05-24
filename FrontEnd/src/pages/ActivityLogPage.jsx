@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback , useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
@@ -21,12 +22,15 @@ const ActivityLogPage = () => {
   const [points, setPoints] = useState(0);
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
+  const fileInputRef = useRef(null); // <-- NEW: to reset input element
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const stored = localStorage.getItem('userData');
-  const { uid } = stored ? JSON.parse(stored) : {};
+  // const stored = localStorage.getItem('userData');
+  // const { uid } = stored ? JSON.parse(stored) : {};
+  const { user } = useAuth();
+  const uid = user?.uid;
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -61,8 +65,8 @@ const ActivityLogPage = () => {
 
   const handleCategoryChange = e => {
     const sel = activityOptions.find(o => o.value === e.target.value);
-    setCategory(sel.value);
-    setPoints(sel.points);
+    setCategory(sel.value || '');
+    setPoints(sel.points || 0);
   };
 
   const handleMediaChange = e => {
@@ -79,9 +83,7 @@ const ActivityLogPage = () => {
       toast.error('Each file must be under 10MB.');
       return;
     }
-    if (
-      files.some(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'))
-    ) {
+    if (files.some(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'))) {
       toast.error('Only image and video files are allowed.');
       return;
     }
@@ -91,12 +93,21 @@ const ActivityLogPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    console.log({ category, description, mediaLength: media.length });
+
     if (!category) {
-      toast.error('Please select an activity category.');
+      return toast.error('Please select an activity category.');
+      // return;
+    }
+    
+    if (!description.trim()) {
+      toast.error('Please fill out the Description');
       return;
     }
+
     if (media.length === 0) {
       toast.error('Please upload at least one media file.');
+      await new Promise(res => setTimeout(res, 50));
       return;
     }
 
@@ -110,7 +121,7 @@ const ActivityLogPage = () => {
 
     setUploading(true);
     try {
-      const res = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/activity/create-log',
         form,
         {
@@ -123,6 +134,7 @@ const ActivityLogPage = () => {
       setCategory('');
       setPoints(0);
       setMedia([]);
+      if(fileInputRef.current) fileInputRef.current.value = '' ; // it clears the file name from input
       fetchLogs();
     } catch (err) {
       console.error('Upload error:', err);
@@ -134,9 +146,11 @@ const ActivityLogPage = () => {
   };
 
   const isVideo = url => /\.(mp4|mov)$/i.test(url);
+  if (!user) return <p className="text-center mt-10">Access Denied</p>;
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg">
+       {user && <Logoutbutton />}
       <h2 className="text-3xl font-bold mb-6 text-center text-green-700">📝 Log New Activity</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <select
@@ -169,6 +183,7 @@ const ActivityLogPage = () => {
             type="file"
             accept="image/*,video/*"
             multiple
+            ref={fileInputRef}
             onChange={handleMediaChange}
             disabled={uploading}
             className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
@@ -191,7 +206,7 @@ const ActivityLogPage = () => {
                     <img src={url} className="w-full h-32 object-cover rounded-xl" />
                   )}
                   <button
-                    type="button"
+                    type="submit"
                     onClick={() => setMedia(media.filter((_, i) => i !== idx))}
                     className="absolute top-2 right-2 bg-red-500 bg-opacity-80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
                   >

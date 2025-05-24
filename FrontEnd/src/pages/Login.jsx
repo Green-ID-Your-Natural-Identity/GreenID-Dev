@@ -5,6 +5,7 @@ import { auth, googleProvider } from "../services/firebase"; // Import the Fireb
 import { useNavigate } from "react-router-dom"; // For navigation
 import { toast , ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css"; // Import CSS for toast
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
 
@@ -12,6 +13,7 @@ const Login = () => {
     const [password, setPassword] = useState(""); // For storing password
     const [error, setError] = useState(""); // For displaying error messages
     const navigate = useNavigate(); // For navigation after successful login
+    const {setUser} = useAuth();
 
     // Handle email/password login
     const handleLogin = async (e) => {
@@ -21,6 +23,14 @@ const Login = () => {
             // Sign in with email and password
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            setUser({
+              uid : user.uid ,
+              email : user.email ,
+              fullName : user.displayName || '' 
+            })
+
+
             console.log("Login Successful - Showing Toast");
             // Show success toast
             toast.success("Login Successful! Redirecting...", {
@@ -44,6 +54,12 @@ const Login = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider); // Sign in with Google
             const user = result.user;
+
+            setUser({
+              uid : user.uid ,
+              email : user.email ,
+              fullName : user.displayName || '' 
+            })
 
             toast.success("Google Login Successful! Redirecting...", {
                 position: "top-right", // Where the toast will appear
