@@ -57,8 +57,14 @@ router.get('/get-user-profile', async (req, res) => {
         
         // Assuming you have an activity log model and are storing logs per user
         const activityLogs = await ActivityLog.find({ uid });
+
+        // Calculate total points by summing only Approved logs
+        const totalPoints = activityLogs
+            .filter(log => log.Status === 'Approved')
+            .reduce((sum, log) => sum + (log.points || 0), 0);
+        // console.log(totalPoints) ;
         
-        res.json({ user, activityLogs });
+        res.json({ user, activityLogs , totalPoints });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching user profile', error });
 

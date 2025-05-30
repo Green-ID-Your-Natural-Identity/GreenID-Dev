@@ -4,17 +4,20 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import LogoutButton from '../components/logoutbutton';
 
+
+
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
   { label: "🚴‍♀️ Sustainable Commute", value: "Sustainable Commute", points: 10 },
   { label: "🔁 Recycling & Reuse", value: "Recycling & Reuse", points: 15 },
-  { label: "♻️ Plastic Waste Reduction", value: "Plastic Waste Reduction", points: 10 },
+  { label: "♻️ Plastic Waste Reduction", value: "Plastic Waste Reduction", points: 5 },
   { label: "🌞 Energy Saving", value: "Energy Saving", points: 8 },
   { label: "💧 Water Conservation", value: "Water Conservation", points: 10 },
   { label: "📚 Sustainability Awareness", value: "Sustainability Awareness", points: 30 },
   { label: "🍃 Clean-up Drives", value: "Clean-up Drive", points: 25 },
   { label: "🌿 Urban Gardening", value: "Urban Gardening", points: 15 },
-  { label: "🧼 Eco-brick Making", value: "Eco-brick Making", points: 20 },
+  { label: "🧼 Watering Plants", value: "Watering Plants", points: 2 },
+  { label: "Others", value: "others", points: 10 },
 ];
 
 const ActivityLogPage = () => {
@@ -28,6 +31,7 @@ const ActivityLogPage = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [errors, setErrors] = useState({});
+  
 
   const { user } = useAuth();
   const uid = user?.uid;
@@ -145,8 +149,11 @@ const ActivityLogPage = () => {
     form.append('uid', uid);
     form.append('description', processDescription(description));
     form.append('category', category);
-    form.append('points', points);
+    // form.append('points', points);
     form.append('location', JSON.stringify(location));
+    form.append('status', 'pending');
+    // form.append('maxPoints', points); // max allowed for category
+    form.append('source', 'user');
     media.forEach(f => form.append('media', f));
 
     setUploading(true);
@@ -189,7 +196,7 @@ const ActivityLogPage = () => {
       if (isNaN(date.getTime())) {
         return 'Recently';
       }
-      return date.toLocaleDateString('en-US', {
+      return date.toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -246,9 +253,10 @@ const ActivityLogPage = () => {
                 </option>
                 {activityOptions.map(o => (
                   <option key={o.value} value={o.value}>
-                    {o.label} (+{o.points} pts)
+                    {o.label} 
                   </option>
                 ))}
+                {/* (+{o.points} pts) */}
               </select>
               {errors.category && (
                 <p className="text-red-500 text-sm flex items-center">
@@ -443,9 +451,16 @@ const ActivityLogPage = () => {
                             🕒 {formatDate(log.logTime)}
                           </span>
                         </div>
-                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold flex-shrink-0">
-                          +{log.points} pts
-                        </span>
+                        <div className='flex flex-col gap-2 ml-10 text-start'>
+                          <p className="text-sm text-gray-600 mt-2">
+                            Status: <span className={`font-semibold ${log.status === 'approved' ? 'text-green-600' : log.status === 'rejected' ? 'text-red-500' : 'text-yellow-600'}`}>
+                                         {log.status || 'pending'}
+                                    </span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Points Awarded: <span className="font-bold">{log.points ?? 'Pending'}</span>
+                          </p>
+                        </div>
                       </div>
 
                       <p className="text-gray-700 mb-3 leading-relaxed">{log.description}</p>

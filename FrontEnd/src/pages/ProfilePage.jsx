@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaMapMarkerAlt, FaBirthdayCake, FaBullseye, FaUser } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaBirthdayCake, FaBullseye, FaUser  , FaStar} from 'react-icons/fa';
 import Logoutbutton from '../components/logoutbutton';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,6 +7,7 @@ const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const {user} = useAuth() ;
   const [activityLogs, setActivityLogs] = useState([]);
+  const [totalPoints , setTotalPoints] = useState(0) ;
 
   useEffect(() => {
     if(!user?.uid) return ;
@@ -21,6 +22,7 @@ const ProfilePage = () => {
       .then(data => {
         setUserData(data.user);
         setActivityLogs(data.activityLogs || []);
+        setTotalPoints(data.totalPoints || 0) ;
       })
       .catch(err => console.error('Error fetching profile:', err));
   }, [user]);
@@ -49,6 +51,10 @@ const ProfilePage = () => {
           <div className="flex items-center space-x-4 mt-2 text-gray-500">
             <p className="flex items-center space-x-1"><FaBirthdayCake /> <span>{userData.age} yrs</span></p>
             <p className="flex items-center space-x-1"><FaMapMarkerAlt /> <span>{userData.location?.city}</span></p>
+            {/* Show Total Points */}
+            <p className="flex items-center space-x-1 text-yellow-500 font-semibold">
+              <FaStar /> <span>{totalPoints} Points</span>
+            </p>
           </div>
         </div>
       </div>
