@@ -4,6 +4,8 @@ import Signup from './pages/Signup'
 import ProfileForm from './pages/ProfileForm'
 import ProfilePage from './pages/ProfilePage'
 import ActivityLogPage from './pages/ActivityLogPage'
+import HariBabaChat from './pages/ChatBot'
+import ChatBot from './pages/ChatBot'
 import { ToastContainer } from 'react-toastify'
 import './App.css'
 
@@ -17,7 +19,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/form" element={<ProfileForm />} />
         <Route path="/profile" element={<ProfilePage /> } />
-        <Route path="/activity-log" element={<ActivityLogPage /> } />
+        <Route path="/activity-log" element={<><ActivityLogPage /> <HariBabaChat/></>} />
+        <Route path="/chatbot" element={<ChatBot /> } />
         
       </Routes>
       <ToastContainer 

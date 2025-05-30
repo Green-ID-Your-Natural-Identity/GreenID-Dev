@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';  // Importing routes using ES Module syntax
 import activityLogRoutes from './routes/activityLogRoutes.js';
+import chatRoutes from "./routes/chatRoutes.js"
 
 // Initialize app
 const app = express();
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 // Use user routes for all '/api/users' paths
 app.use('/api/users', userRoutes); // All user-related routes are prefixed with '/api/users'
 app.use('/api/activity', activityLogRoutes);
+app.use("/api/chatbot", chatRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
