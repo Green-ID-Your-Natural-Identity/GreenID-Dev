@@ -7,6 +7,7 @@ import LogoutButton from "../components/logoutbutton";
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
   { label: "🚴‍♀️ Sustainable Commute", value: "Sustainable Commute", points: 10 },
+  { label: "🚌 Public Transport", value: "Public Transport", points: 15 },
   { label: "🔁 Recycling & Reuse", value: "Recycling & Reuse", points: 15 },
   {
     label: "♻️ Plastic Waste Reduction",
@@ -156,14 +157,25 @@ const ActivityLogPage = () => {
       toast.error("Each file must be under 10MB.");
       return;
     }
-    if (
-      files.some(
-        (f) => !f.type.startsWith("image/") && !f.type.startsWith("video/")
-      )
-    ) {
-      toast.error("Only image and video files are allowed.");
-      return;
+    
+    // For Tree Plantation, only allow videos
+    if (category === "Tree Plantation") {
+      if (files.some((f) => !f.type.startsWith("video/"))) {
+        toast.error("Tree Plantation requires video files only.");
+        return;
+      }
+    } else {
+      // For other categories, allow images and videos
+      if (
+        files.some(
+          (f) => !f.type.startsWith("image/") && !f.type.startsWith("video/")
+        )
+      ) {
+        toast.error("Only image and video files are allowed.");
+        return;
+      }
     }
+    
     setMedia(files);
     setProgress(0);
     if (errors.media) {
@@ -414,7 +426,7 @@ const ActivityLogPage = () => {
               >
                 <input
                   type="file"
-                  accept="image/*,video/*"
+                  accept={category === "Tree Plantation" ? "video/*" : "image/*,video/*"}
                   multiple
                   ref={fileInputRef}
                   onChange={handleMediaChange}
@@ -426,7 +438,9 @@ const ActivityLogPage = () => {
                     file:shadow-lg hover:file:shadow-xl"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  📷 Upload up to 4 images or videos (max 10MB each)
+                  {category === "Tree Plantation" 
+                    ? "🎥 Upload videos only (max 10MB each)" 
+                    : "📷 Upload up to 4 images or videos (max 10MB each)"}
                 </p>
               </div>
               {errors.media && (

@@ -9,6 +9,7 @@ const router = express.Router();
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
   { label: "🚴‍♀️ Sustainable Commute", value: "Sustainable Commute", points: 10 },
+  { label: "🚌 Public Transport", value: "Public Transport", points: 15 },
   { label: "🔁 Recycling & Reuse", value: "Recycling & Reuse", points: 15 },
   {
     label: "♻️ Plastic Waste Reduction",
@@ -86,12 +87,7 @@ router.post(
       // Save to database
       await newLog.save();
 
-      res.status(201).json({
-        message: "Activity log created successfully!",
-        log: newLog,
-      });
-
-      // 🧠 Begin verification logic after save
+      // 🧠 Begin verification logic BEFORE sending response
       let autoUpdated = false;
 
       // 🔀 "Others" always go to manual
@@ -139,6 +135,128 @@ router.post(
           console.error("Flask verification failed:", err.message);
           newLog.Status = "Manual_Review";
         }
+      }
+      // 🌳 Tree Plantation — use ML video analysis
+      else if (category === "Tree Plantation" && mediaUrls && mediaUrls.length > 0) {
+        try {
+          // Check if media is a video file
+          const videoUrl = mediaUrls.find(url => 
+            url.toLowerCase().match(/\.(mp4|mov|avi|webm)$/)
+          );
+          
+          if (!videoUrl) {
+            // No video found, send to manual review
+            newLog.Status = "Manual_Review";
+            console.log("⚠️ Tree Plantation requires video, no video found");
+          } else {
+            // Use FormData to send video to ML service
+            const FormData = (await import('form-data')).default;
+            const formData = new FormData();
+            
+            // Download video from Cloudinary and send to ML service
+            const videoResponse = await axios.get(videoUrl, {
+              responseType: 'arraybuffer'
+            });
+            
+            formData.append('video', Buffer.from(videoResponse.data), {
+              filename: 'planting.mp4',
+              contentType: 'video/mp4'
+            });
+            
+            const mlRes = await axios.post(
+              "http://127.0.0.1:5000/verify_planting",
+              formData,
+              {
+                headers: formData.getHeaders()
+              }
+            );
+            
+            const { is_valid, confidence, evidence, reason } = mlRes.data;
+            
+            newLog.modelOutput = mlRes.data;
+            newLog.source = "ml";
+            newLog.confidenceScore = confidence;
+            
+            // Decision logic
+            if (is_valid && confidence >= 0.6) {
+              newLog.Status = "Approved";
+              newLog.points = Math.round(maxPoints * confidence);
+              autoUpdated = true;
+            } else if (confidence >= 0.4 && confidence < 0.6) {
+              newLog.Status = "Manual_Review";
+            } else {
+              newLog.Status = "Rejected";
+              newLog.points = 0;
+              autoUpdated = true;
+            }
+            
+            console.log(
+              `✅ ML verified planting: ${reason} | Confidence: ${(confidence * 100).toFixed(2)}%`
+            );
+          }
+        } catch (err) {
+          console.error("ML planting verification failed:", err.message);
+          newLog.Status = "Manual_Review";
+        }
+      }
+      // 🚌 Public Transport — use ML image classification
+      else if (category === "Public Transport" && mediaUrls && mediaUrls.length > 0) {
+        try {
+          // Use FormData to send image to ML service
+          const FormData = (await import('form-data')).default;
+          const formData = new FormData();
+          
+          // Extract image URL from Cloudinary (first media item)
+          const imageUrl = mediaUrls[0];
+          
+          // Download image from Cloudinary and send to ML service
+          const imageResponse = await axios.get(imageUrl, {
+            responseType: 'arraybuffer'
+          });
+          
+          formData.append('image', Buffer.from(imageResponse.data), {
+            filename: 'transport.jpg',
+            contentType: 'image/jpeg'
+          });
+          
+          const mlRes = await axios.post(
+            "http://127.0.0.1:5000/verify_public_transport",
+            formData,
+            {
+              headers: formData.getHeaders()
+            }
+          );
+          
+          const { predicted_class, confidence, all_probabilities, is_valid } = mlRes.data;
+          
+          newLog.modelOutput = mlRes.data;
+          newLog.source = "ml";
+          newLog.confidenceScore = confidence;
+          
+          // Decision logic
+          if (predicted_class === "not_transport") {
+            newLog.Status = "Rejected";
+            newLog.points = 0;
+            autoUpdated = true;
+          } else if (is_valid && confidence >= 0.7) {
+            newLog.Status = "Approved";
+            newLog.points = Math.round(maxPoints * confidence);
+            autoUpdated = true;
+          } else if (confidence >= 0.4 && confidence < 0.7) {
+            newLog.Status = "Manual_Review";
+          } else {
+            newLog.Status = "Rejected";
+            newLog.points = 0;
+            autoUpdated = true;
+          }
+          
+          console.log(
+            `✅ ML verified transport: ${predicted_class} | Confidence: ${(confidence * 100).toFixed(2)}%`
+          );
+        } catch (err) {
+          console.error("ML verification failed:", err.message);
+          newLog.Status = "Manual_Review";
+        }
       } else {
         const confidence = dummyMLVerifier(description, category);
         newLog.confidenceScore = confidence;
@@ -163,6 +281,12 @@ router.post(
       if (autoUpdated) {
         await newLog.save();
       }
+
+      // ✅ Send response AFTER verification completes
+      res.status(201).json({
+        message: "Activity log created successfully!",
+        log: newLog,
+      });
     } catch (error) {
       console.error("Activity log error:", error); // 👈 Will now show full object
       return res.status(500).json({
