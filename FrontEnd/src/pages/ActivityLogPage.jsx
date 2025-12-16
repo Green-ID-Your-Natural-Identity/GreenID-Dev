@@ -1,19 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
-import LogoutButton from '../components/logoutbutton';
-
-
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
+import LogoutButton from "../components/logoutbutton";
 
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
   { label: "🚴‍♀️ Sustainable Commute", value: "Sustainable Commute", points: 10 },
   { label: "🔁 Recycling & Reuse", value: "Recycling & Reuse", points: 15 },
-  { label: "♻️ Plastic Waste Reduction", value: "Plastic Waste Reduction", points: 5 },
+  {
+    label: "♻️ Plastic Waste Reduction",
+    value: "Plastic Waste Reduction",
+    points: 5,
+  },
   { label: "🌞 Energy Saving", value: "Energy Saving", points: 8 },
   { label: "💧 Water Conservation", value: "Water Conservation", points: 10 },
-  { label: "📚 Sustainability Awareness", value: "Sustainability Awareness", points: 30 },
+  {
+    label: "📚 Sustainability Awareness",
+    value: "Sustainability Awareness",
+    points: 30,
+  },
   { label: "🍃 Clean-up Drives", value: "Clean-up Drive", points: 25 },
   { label: "🌿 Urban Gardening", value: "Urban Gardening", points: 15 },
   { label: "🧼 Watering Plants", value: "Watering Plants", points: 2 },
@@ -21,8 +27,8 @@ const activityOptions = [
 ];
 
 const ActivityLogPage = () => {
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [points, setPoints] = useState(0);
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
@@ -31,35 +37,39 @@ const ActivityLogPage = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [errors, setErrors] = useState({});
-  
+  const [coordinates, setCoordinates] = useState([]);
+  const [isMarkingWalk, setIsMarkingWalk] = useState(false);
 
   const { user } = useAuth();
   const uid = user?.uid;
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      toast.warn('Geolocation is not supported by your browser.');
+      toast.warn("Geolocation is not supported by your browser.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      position => setLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      }),
-      error => {
-        console.error('Geo error:', error);
-        toast.error('Unable to retrieve your location.');
+      (position) =>
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+      (error) => {
+        console.error("Geo error:", error);
+        toast.error("Unable to retrieve your location.");
       }
     );
   }, []);
 
   const fetchLogs = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/users/get-user-profile?uid=${uid}`);
+      const res = await axios.get(
+        `http://localhost:5000/api/users/get-user-profile?uid=${uid}`
+      );
       setLogs(res.data.activityLogs || []);
     } catch (err) {
-      console.error('Fetch logs error:', err);
-      toast.error('Could not load past logs.');
+      console.error("Fetch logs error:", err);
+      toast.error("Could not load past logs.");
     }
   }, [uid]);
 
@@ -67,119 +77,165 @@ const ActivityLogPage = () => {
     if (uid) fetchLogs();
   }, [fetchLogs, uid]);
 
-  const handleCategoryChange = e => {
-    const sel = activityOptions.find(o => o.value === e.target.value);
-    setCategory(sel?.value || '');
+  const handleCategoryChange = (e) => {
+    const sel = activityOptions.find((o) => o.value === e.target.value);
+    setCategory(sel?.value || "");
     setPoints(sel?.points || 0);
     if (errors.category) {
-      setErrors(prev => ({ ...prev, category: null }));
+      setErrors((prev) => ({ ...prev, category: null }));
     }
   };
 
-  const handleDescriptionChange = e => {
+  const markStart = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported!");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCoordinates([{ lat: latitude, lon: longitude }]);
+        setIsMarkingWalk(true);
+        toast.success("✅ Start location recorded!");
+      },
+      (err) => {
+        console.error(err);
+        toast.error("Failed to get start location!");
+      }
+    );
+  };
+
+  const markEnd = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported!");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCoordinates((prev) => [...prev, { lat: latitude, lon: longitude }]);
+        setIsMarkingWalk(false);
+        toast.success("✅ End location recorded!");
+      },
+      (err) => {
+        console.error(err);
+        toast.error("Failed to get end location!");
+      }
+    );
+  };
+
+  const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
     if (errors.description) {
-      setErrors(prev => ({ ...prev, description: null }));
+      setErrors((prev) => ({ ...prev, description: null }));
     }
   };
 
   const processDescription = (text) => {
     return text
       .trim()
-      .replace(/\s+/g, ' ')
+      .replace(/\s+/g, " ")
       .replace(/(^\w|\.\s*\w)/g, (match) => match.toUpperCase())
-      .replace(/([.!?])\s*([a-z])/g, (match, punct, letter) => punct + ' ' + letter.toUpperCase());
+      .replace(
+        /([.!?])\s*([a-z])/g,
+        (match, punct, letter) => punct + " " + letter.toUpperCase()
+      );
   };
 
-  const handleMediaChange = e => {
+  const handleMediaChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) {
       setMedia([]);
       return;
     }
     if (files.length > 4) {
-      toast.error('Only up to 4 files are allowed.');
+      toast.error("Only up to 4 files are allowed.");
       return;
     }
-    if (files.some(f => f.size > 10 * 1024 * 1024)) {
-      toast.error('Each file must be under 10MB.');
+    if (files.some((f) => f.size > 10 * 1024 * 1024)) {
+      toast.error("Each file must be under 10MB.");
       return;
     }
-    if (files.some(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'))) {
-      toast.error('Only image and video files are allowed.');
+    if (
+      files.some(
+        (f) => !f.type.startsWith("image/") && !f.type.startsWith("video/")
+      )
+    ) {
+      toast.error("Only image and video files are allowed.");
       return;
     }
     setMedia(files);
     setProgress(0);
     if (errors.media) {
-      setErrors(prev => ({ ...prev, media: null }));
+      setErrors((prev) => ({ ...prev, media: null }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!category) {
-      newErrors.category = 'Please select an activity category.';
-      toast.error('Please select an activity category.');
+      newErrors.category = "Please select an activity category.";
+      toast.error("Please select an activity category.");
     }
-    
+
     if (!description.trim()) {
-      newErrors.description = 'Please fill out the description.';
-      toast.error('Please fill out the description.');
+      newErrors.description = "Please fill out the description.";
+      toast.error("Please fill out the description.");
     }
 
     if (media.length === 0) {
-      newErrors.media = 'Please upload at least one media file.';
-      toast.error('Please upload at least one media file.');
+      newErrors.media = "Please upload at least one media file.";
+      toast.error("Please upload at least one media file.");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     const form = new FormData();
-    form.append('uid', uid);
-    form.append('description', processDescription(description));
-    form.append('category', category);
+    form.append("uid", uid);
+    form.append("description", processDescription(description));
+    form.append("category", category);
     // form.append('points', points);
-    form.append('location', JSON.stringify(location));
-    form.append('status', 'pending');
+    form.append("location", JSON.stringify(location));
+    form.append("status", "pending");
     // form.append('maxPoints', points); // max allowed for category
-    form.append('source', 'user');
-    media.forEach(f => form.append('media', f));
+    form.append("source", "user");
+
+    if (category === "Sustainable Commute") {
+      form.append("coordinates", JSON.stringify(coordinates));
+    }
+    media.forEach((f) => form.append("media", f));
 
     setUploading(true);
     try {
-      await axios.post(
-        'http://localhost:5000/api/activity/create-log',
-        form,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          onUploadProgress: e => setProgress(Math.round((e.loaded * 100) / e.total))
-        }
-      );
-      toast.success('🎉 Activity logged successfully!');
-      
-      setDescription('');
-      setCategory('');
+      await axios.post("http://localhost:5000/api/activity/create-log", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (e) =>
+          setProgress(Math.round((e.loaded * 100) / e.total)),
+      });
+      toast.success("🎉 Activity logged successfully!");
+
+      setDescription("");
+      setCategory("");
       setPoints(0);
       setMedia([]);
       setErrors({});
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
       fetchLogs();
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error("Upload error:", err);
       const msg = err.response?.data?.message;
-      toast.error(msg || 'Upload failed. Please try again.');
+      toast.error(msg || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
       setProgress(0);
@@ -194,22 +250,22 @@ const ActivityLogPage = () => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return 'Recently';
+        return "Recently";
       }
-      return date.toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch (error) {
-      return 'Recently';
+      return "Recently";
     }
   };
 
-  const isVideo = url => /\.(mp4|mov)$/i.test(url);
-  
+  const isVideo = (url) => /\.(mp4|mov)$/i.test(url);
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
@@ -228,20 +284,28 @@ const ActivityLogPage = () => {
             <LogoutButton />
           </div>
         )}
-        
+
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold text-green-600 mb-3">
               📝 Log New Activity
             </h2>
-            <p className="text-gray-600 text-lg">Make a positive impact and earn points!</p>
+            <p className="text-gray-600 text-lg">
+              Make a positive impact and earn points!
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">Activity Category</label>
+              <label className="block text-sm font-semibold text-gray-700">
+                Activity Category
+              </label>
               <select
-                className={`w-full border-2 ${errors.category ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-green-500'} 
+                className={`w-full border-2 ${
+                  errors.category
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-300 focus:border-green-500"
+                } 
                   rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 text-lg bg-white text-gray-800
                   transition-all duration-200 hover:border-green-400`}
                 value={category}
@@ -251,9 +315,9 @@ const ActivityLogPage = () => {
                 <option value="" disabled>
                   🌍 Select Activity Category
                 </option>
-                {activityOptions.map(o => (
+                {activityOptions.map((o) => (
                   <option key={o.value} value={o.value}>
-                    {o.label} 
+                    {o.label}
                   </option>
                 ))}
                 {/* (+{o.points} pts) */}
@@ -265,20 +329,64 @@ const ActivityLogPage = () => {
                 </p>
               )}
             </div>
+            {console.log("Selected category:", category)}
+            {category === "Sustainable Commute" && (
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                <p className="text-blue-800 font-semibold mb-2">
+                  🚶 Walking Tracker
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={markStart}
+                    disabled={coordinates.length > 0}
+                    className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all"
+                  >
+                    Mark Start
+                  </button>
+                  <button
+                    type="button"
+                    onClick={markEnd}
+                    disabled={
+                      coordinates.length === 0 || coordinates.length >= 2
+                    }
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all"
+                  >
+                    Mark End
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">
+                  {coordinates.length === 0
+                    ? "No points marked yet."
+                    : coordinates.length === 1
+                    ? "Start point recorded."
+                    : "✅ Start & End recorded."}
+                </p>
+              </div>
+            )}
 
             {points > 0 && (
               <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200 rounded-2xl p-4">
                 <p className="text-green-800 font-semibold flex items-center">
                   <span className="text-green-600 mr-2">🏆</span>
-                  You'll earn <span className="font-bold mx-1">{points}</span> points for this activity!
+                  You'll earn <span className="font-bold mx-1">
+                    {points}
+                  </span>{" "}
+                  points for this activity!
                 </p>
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">Description</label>
+              <label className="block text-sm font-semibold text-gray-700">
+                Description
+              </label>
               <textarea
-                className={`w-full border-2 ${errors.description ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-green-500'} 
+                className={`w-full border-2 ${
+                  errors.description
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-300 focus:border-green-500"
+                } 
                   rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 resize-y h-32 text-lg bg-white text-gray-800
                   transition-all duration-200 hover:border-green-400`}
                 placeholder="Tell us about your eco-friendly activity... 🌱"
@@ -295,9 +403,15 @@ const ActivityLogPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">Upload Media</label>
-              <div className={`border-2 border-dashed ${errors.media ? 'border-red-400' : 'border-gray-300'} 
-                rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}>
+              <label className="block text-sm font-semibold text-gray-700">
+                Upload Media
+              </label>
+              <div
+                className={`border-2 border-dashed ${
+                  errors.media ? "border-red-400" : "border-gray-300"
+                } 
+                rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+              >
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -331,15 +445,15 @@ const ActivityLogPage = () => {
                     const url = URL.createObjectURL(f);
                     return (
                       <div key={idx} className="relative group">
-                        {f.type.startsWith('video/') ? (
-                          <video 
-                            src={url} 
-                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow" 
+                        {f.type.startsWith("video/") ? (
+                          <video
+                            src={url}
+                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
                           />
                         ) : (
-                          <img 
-                            src={url} 
-                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow" 
+                          <img
+                            src={url}
+                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
                           />
                         )}
                         <button
@@ -376,9 +490,11 @@ const ActivityLogPage = () => {
               type="submit"
               disabled={uploading}
               className={`w-full py-4 rounded-2xl text-xl font-bold text-white shadow-lg transform transition-all duration-200
-                ${uploading
-                  ? 'bg-gray-400 cursor-not-allowed scale-100'
-                  : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 hover:shadow-xl active:scale-95'}
+                ${
+                  uploading
+                    ? "bg-gray-400 cursor-not-allowed scale-100"
+                    : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 hover:shadow-xl active:scale-95"
+                }
               `}
             >
               {uploading ? (
@@ -403,25 +519,27 @@ const ActivityLogPage = () => {
             </h3>
             {logs.length > 0 && (
               <span className="ml-4 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                {logs.length} {logs.length === 1 ? 'activity' : 'activities'}
+                {logs.length} {logs.length === 1 ? "activity" : "activities"}
               </span>
             )}
           </div>
-          
+
           {logs.length > 0 ? (
             <div className="space-y-6">
-              {[...logs].reverse().map(log => (
-                <div key={log._id} className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-100 
-                  rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-200">
-                  
+              {[...logs].reverse().map((log) => (
+                <div
+                  key={log._id}
+                  className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-100 
+                  rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-200"
+                >
                   <div className="flex gap-4">
                     <div className="flex-shrink-0 w-16 h-16">
                       {log.media?.length > 0 ? (
                         <div className="relative">
                           {isVideo(log.media[0]) ? (
-                            <video 
-                              src={log.media[0]} 
-                              className="w-16 h-16 object-cover rounded-xl shadow-md" 
+                            <video
+                              src={log.media[0]}
+                              className="w-16 h-16 object-cover rounded-xl shadow-md"
                             />
                           ) : (
                             <img
@@ -446,48 +564,80 @@ const ActivityLogPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="text-xl font-bold text-green-800">{log.category}</h4>
+                          <h4 className="text-xl font-bold text-green-800">
+                            {log.category}
+                          </h4>
                           <span className="text-gray-500 text-sm">
                             🕒 {formatDate(log.logTime)}
                           </span>
                         </div>
-                        <div className='flex flex-col gap-2 ml-10 text-start'>
+                        <div className="flex flex-col gap-2 ml-10 text-start">
                           <p className="text-sm text-gray-600 mt-2">
-                            Status: <span className={`font-semibold ${log.status === 'approved' ? 'text-green-600' : log.status === 'rejected' ? 'text-red-500' : 'text-yellow-600'}`}>
-                                         {log.status || 'pending'}
-                                    </span>
+                            Status:{" "}
+                            <span
+                              className={`font-semibold ${
+                                log.Status === "Approved"
+                                  ? "text-green-600"
+                                  : log.Status === "Rejected"
+                                  ? "text-red-500"
+                                  : "text-yellow-600"
+                              }`}
+                            >
+                              {log.Status || "pending"}
+                            </span>
                           </p>
                           <p className="text-sm text-gray-600">
-                            Points Awarded: <span className="font-bold">{log.points ?? 'Pending'}</span>
+                            Points Awarded:{" "}
+                            <span className="font-bold">
+                              {log.points ?? "Pending"}
+                            </span>
                           </p>
                         </div>
                       </div>
 
-                      <p className="text-gray-700 mb-3 leading-relaxed">{log.description}</p>
-                      
+                      <p className="text-gray-700 mb-3 leading-relaxed">
+                        {log.description}
+                      </p>
+
+                      {log.category === "Sustainable Commute" &&
+                        log.modelOutput?.total_distance_km !== undefined && (
+                          <p className="text-sm text-blue-700 font-semibold mt-1">
+                            🚶 Total Distance Walked:{" "}
+                            <span className="text-blue-900">
+                              {log.modelOutput.total_distance_km.toFixed(2)} km
+                            </span>
+                          </p>
+                        )}
+
                       {log.media?.length > 1 && (
-                        <div className={`grid gap-2 mt-4 ${
-                          log.media.length === 2 ? 'grid-cols-2' : 
-                          log.media.length === 3 ? 'grid-cols-3' : 
-                          'grid-cols-2'
-                        }`}>
-                          {log.media.slice(1).map((url, idx) =>
-                            isVideo(url) ? (
-                              <video 
-                                key={idx} 
-                                src={url} 
-                                controls 
-                                className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow" 
-                              />
-                            ) : (
-                              <img
-                                key={idx}
-                                src={url}
-                                alt="activity media"
-                                className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                              />
-                            )
-                          )}
+                        <div
+                          className={`grid gap-2 mt-4 ${
+                            log.media.length === 2
+                              ? "grid-cols-2"
+                              : log.media.length === 3
+                              ? "grid-cols-3"
+                              : "grid-cols-2"
+                          }`}
+                        >
+                          {log.media
+                            .slice(1)
+                            .map((url, idx) =>
+                              isVideo(url) ? (
+                                <video
+                                  key={idx}
+                                  src={url}
+                                  controls
+                                  className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                                />
+                              ) : (
+                                <img
+                                  key={idx}
+                                  src={url}
+                                  alt="activity media"
+                                  className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                                />
+                              )
+                            )}
                         </div>
                       )}
                     </div>
@@ -498,8 +648,12 @@ const ActivityLogPage = () => {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🌱</div>
-              <p className="text-gray-600 text-lg mb-2">No activities logged yet.</p>
-              <p className="text-gray-500">Start your eco-journey by logging your first activity above!</p>
+              <p className="text-gray-600 text-lg mb-2">
+                No activities logged yet.
+              </p>
+              <p className="text-gray-500">
+                Start your eco-journey by logging your first activity above!
+              </p>
             </div>
           )}
         </div>

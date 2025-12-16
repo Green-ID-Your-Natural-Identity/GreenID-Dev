@@ -1,8 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Double:wght@100..900&family=Bitcount:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Parkinsans:wght@300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
-html , body {
+html , body , #root{
   background-color: black;
   color: white;
-  display: flex ;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100vw ;
+  height: 100%;
+  /* font-family: "Outfit", sans-serif; */
+  font-family: "parkinsans", sans-serif;
+}
+#root {
+  padding: 0 !important ;
+  margin: 0 !important;
+}
+
+.hero {
+  font-family: "Bitcount Prop Double", system-ui;
+}
+.clip-wavy {
+  clip-path: polygon(0 60%, 20% 55%, 40% 65%, 60% 50%, 80% 60%, 100% 55%, 100% 100%, 0% 100%);
 }

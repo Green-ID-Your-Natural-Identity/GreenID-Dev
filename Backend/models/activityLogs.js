@@ -47,6 +47,7 @@ const activityLogSchema = new mongoose.Schema({
         type: String 
     }],
 
+
     location: {  // 📍 Optional
         latitude: {
             type: Number
@@ -54,6 +55,16 @@ const activityLogSchema = new mongoose.Schema({
         longitude: {
             type: Number
         }
+    },
+
+    coordinates: [{ 
+        lat: { type: Number }, 
+        lon: { type: Number }
+    }],
+
+    modelOutput: {  // 🆕 Stores raw ML API response
+        type: Object,
+        default: null
     },
 
     logTime: {  // 🕒 System se automatically generate hoga

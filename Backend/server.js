@@ -6,14 +6,20 @@ import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';  // Importing routes using ES Module syntax
 import activityLogRoutes from './routes/activityLogRoutes.js';
 import chatRoutes from "./routes/chatRoutes.js"
+import adminRoutes from './routes/admin.js' ;
+import sessionMiddleware from './config/sessionConfig.js';
 
 // Initialize app
 const app = express();
 dotenv.config(); // Load environment variables from .env
 
 // Middlewares
-app.use(cors());            // Allow frontend to access backend
+app.use(cors({
+    origin: 'http://localhost:5173', // or wherever your frontend runs
+    credentials: true
+}));            // Allow frontend to access backend
 app.use(express.json());    // Allow backend to read JSON data from requests
+app.use(sessionMiddleware); // ✅ VERY IMPORTANT: use before any routes
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -24,6 +30,8 @@ mongoose.connect(process.env.MONGO_URI)
 app.get("/", (req, res) => {
     res.send("🚀 Backend is working!");
 });
+
+app.use('/api/admin', adminRoutes);
 
 // Use user routes for all '/api/users' paths
 app.use('/api/users', userRoutes); // All user-related routes are prefixed with '/api/users'

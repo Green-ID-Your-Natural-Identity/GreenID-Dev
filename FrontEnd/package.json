@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.14.4",
+    "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.10.39",
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.9.0",
     "dompurify": "^3.2.6",

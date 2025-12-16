@@ -1,0 +1,822 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Public Transport Model Test Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric {
+            display: inline-block;
+            margin: 10px 20px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .correct {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .confidence-bar {
+            height: 20px;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 40px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚌 Public Transport Classification Model - Test Report</h1>
+    <p><strong>Generated:</strong> 2025-12-17 01:06:33</p>
+    
+    <div class="summary">
+        <h2>📊 Summary</h2>
+        <div class="metric">
+            <div class="metric-value">95.7%</div>
+            <div class="metric-label">Overall Accuracy</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">45/47</div>
+            <div class="metric-label">Correct Predictions</div>
+        </div>
+    </div>
+    
+    <h2>📈 Per-Class Performance</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+                <th>Support</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><strong>auto_rickshaw</strong></td>
+                <td>100.00%</td>
+                <td>100.00%</td>
+                <td>100.00%</td>
+                <td>11</td>
+            </tr>
+
+            <tr>
+                <td><strong>bus</strong></td>
+                <td>100.00%</td>
+                <td>92.31%</td>
+                <td>96.00%</td>
+                <td>26</td>
+            </tr>
+
+            <tr>
+                <td><strong>metro</strong></td>
+                <td>75.00%</td>
+                <td>100.00%</td>
+                <td>85.71%</td>
+                <td>6</td>
+            </tr>
+
+            <tr>
+                <td><strong>not_transport</strong></td>
+                <td>100.00%</td>
+                <td>100.00%</td>
+                <td>100.00%</td>
+                <td>4</td>
+            </tr>
+
+        </tbody>
+    </table>
+    
+    <h2>🔍 Detailed Results</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Ground Truth</th>
+                <th>Predicted</th>
+                <th>Confidence</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>auto.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99995231628418%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto10.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 100.0%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto11.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.9998688697815%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto2.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99980926513672%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto3.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99940395355225%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto4.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.98533725738525%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto5.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99918937683105%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto6.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.98471736907959%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto7.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 100.0%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto8.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.98495578765869%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>auto9.jpg</td>
+                <td>auto_rickshaw</td>
+                <td class="correct">auto_rickshaw</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.9998688697815%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus1.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99984502792358%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus10.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.89246726036072%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus11.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99988079071045%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus12.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.94435906410217%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus13.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 97.61849045753479%; padding: 2px 8px; font-size: 12px; color: white;">
+                            97.6%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus14.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 79.09446358680725%; padding: 2px 8px; font-size: 12px; color: white;">
+                            79.1%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus15.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 84.10006165504456%; padding: 2px 8px; font-size: 12px; color: white;">
+                            84.1%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus16.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.90904331207275%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus17.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.93475079536438%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus18.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 96.93869948387146%; padding: 2px 8px; font-size: 12px; color: white;">
+                            96.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus19.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.95334148406982%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus2.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.95338916778564%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus20.png</td>
+                <td>bus</td>
+                <td class="incorrect">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 88.89765739440918%; padding: 2px 8px; font-size: 12px; color: white;">
+                            88.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="incorrect">✗</td>
+            </tr>
+
+            <tr>
+                <td>bus21.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 75.2427339553833%; padding: 2px 8px; font-size: 12px; color: white;">
+                            75.2%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus22.png</td>
+                <td>bus</td>
+                <td class="incorrect">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 72.41044044494629%; padding: 2px 8px; font-size: 12px; color: white;">
+                            72.4%
+                        </div>
+                    </div>
+                </td>
+                <td class="incorrect">✗</td>
+            </tr>
+
+            <tr>
+                <td>bus23.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.929940700531%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus24.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 96.79775834083557%; padding: 2px 8px; font-size: 12px; color: white;">
+                            96.8%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus25.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.75524544715881%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.8%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus26.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99744892120361%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus3.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99850988388062%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus4.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99749660491943%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus5.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99998807907104%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus6.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.90873336791992%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus7.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99988079071045%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus8.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99960660934448%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>bus9.png</td>
+                <td>bus</td>
+                <td class="correct">bus</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.00278449058533%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>img1 (1).png</td>
+                <td>not_transport</td>
+                <td class="correct">not_transport</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99022483825684%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>img1.png</td>
+                <td>not_transport</td>
+                <td class="correct">not_transport</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.90624785423279%; padding: 2px 8px; font-size: 12px; color: white;">
+                            99.9%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>img10 (1).png</td>
+                <td>not_transport</td>
+                <td class="correct">not_transport</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 97.73241877555847%; padding: 2px 8px; font-size: 12px; color: white;">
+                            97.7%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>img10.png</td>
+                <td>not_transport</td>
+                <td class="correct">not_transport</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99715089797974%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro1.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99916553497314%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro2.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99927282333374%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro3.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99637603759766%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro4.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99973773956299%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro5.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99992847442627%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+            <tr>
+                <td>metro6.png</td>
+                <td>metro</td>
+                <td class="correct">metro</td>
+                <td>
+                    <div style="width: 100%; background: #ecf0f1; border-radius: 4px;">
+                        <div class="confidence-bar" style="width: 99.99973773956299%; padding: 2px 8px; font-size: 12px; color: white;">
+                            100.0%
+                        </div>
+                    </div>
+                </td>
+                <td class="correct">✓</td>
+            </tr>
+
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Generated by Public Transport Classification Model Testing Script</p>
+    </div>
+</body>
+</html>
