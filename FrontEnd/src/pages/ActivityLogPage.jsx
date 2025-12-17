@@ -34,6 +34,10 @@ const ActivityLogPage = () => {
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
   const fileInputRef = useRef(null);
+  const [beforeImage, setBeforeImage] = useState(null);
+  const [afterImage, setAfterImage] = useState(null);
+  const beforeFileInputRef = useRef(null);
+  const afterFileInputRef = useRef(null);
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -183,6 +187,46 @@ const ActivityLogPage = () => {
     }
   };
 
+  const handleBeforeImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setBeforeImage(null);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File must be under 10MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed.");
+      return;
+    }
+    setBeforeImage(file);
+    if (errors.beforeImage) {
+      setErrors((prev) => ({ ...prev, beforeImage: null }));
+    }
+  };
+
+  const handleAfterImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setAfterImage(null);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File must be under 10MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed.");
+      return;
+    }
+    setAfterImage(file);
+    if (errors.afterImage) {
+      setErrors((prev) => ({ ...prev, afterImage: null }));
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -196,9 +240,22 @@ const ActivityLogPage = () => {
       toast.error("Please fill out the description.");
     }
 
-    if (media.length === 0) {
-      newErrors.media = "Please upload at least one media file.";
-      toast.error("Please upload at least one media file.");
+    // Special validation for Clean-up Drive
+    if (category === "Clean-up Drive") {
+      if (!beforeImage) {
+        newErrors.beforeImage = "Please upload a before image.";
+        toast.error("Please upload a before image.");
+      }
+      if (!afterImage) {
+        newErrors.afterImage = "Please upload an after image.";
+        toast.error("Please upload an after image.");
+      }
+    } else {
+      // Regular media validation for other categories
+      if (media.length === 0) {
+        newErrors.media = "Please upload at least one media file.";
+        toast.error("Please upload at least one media file.");
+      }
     }
 
     setErrors(newErrors);
@@ -225,7 +282,14 @@ const ActivityLogPage = () => {
     if (category === "Sustainable Commute") {
       form.append("coordinates", JSON.stringify(coordinates));
     }
-    media.forEach((f) => form.append("media", f));
+    
+    // For Clean-up Drive, append before and after images separately
+    if (category === "Clean-up Drive") {
+      form.append("media", beforeImage);
+      form.append("media", afterImage);
+    } else {
+      media.forEach((f) => form.append("media", f));
+    }
 
     setUploading(true);
     try {
@@ -240,8 +304,12 @@ const ActivityLogPage = () => {
       setCategory("");
       setPoints(0);
       setMedia([]);
+      setBeforeImage(null);
+      setAfterImage(null);
       setErrors({});
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (beforeFileInputRef.current) beforeFileInputRef.current.value = "";
+      if (afterFileInputRef.current) afterFileInputRef.current.value = "";
 
       fetchLogs();
     } catch (err) {
@@ -414,42 +482,137 @@ const ActivityLogPage = () => {
               )}
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Upload Media
-              </label>
-              <div
-                className={`border-2 border-dashed ${
-                  errors.media ? "border-red-400" : "border-gray-300"
-                } 
-                rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
-              >
-                <input
-                  type="file"
-                  accept={category === "Tree Plantation" ? "video/*" : "image/*,video/*"}
-                  multiple
-                  ref={fileInputRef}
-                  onChange={handleMediaChange}
-                  disabled={uploading}
-                  className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
-                    file:rounded-xl file:border-0 file:text-sm file:font-semibold
-                    file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
-                    hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
-                    file:shadow-lg hover:file:shadow-xl"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  {category === "Tree Plantation" 
-                    ? "🎥 Upload videos only (max 10MB each)" 
-                    : "📷 Upload up to 4 images or videos (max 10MB each)"}
-                </p>
+            {/* Conditional rendering for Clean-up Drive vs other categories */}
+            {category === "Clean-up Drive" ? (
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700">Upload Before & After Images</h4>
+                
+                {/* Before Image */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    📸 Before Image
+                  </label>
+                  <div
+                    className={`border-2 border-dashed ${
+                      errors.beforeImage ? "border-red-400" : "border-gray-300"
+                    } 
+                    rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={beforeFileInputRef}
+                      onChange={handleBeforeImageChange}
+                      disabled={uploading}
+                      className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                        file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                        file:bg-gradient-to-r file:from-blue-500 file:to-blue-600 file:text-white
+                        hover:file:from-blue-600 hover:file:to-blue-700 file:transition-all file:duration-200
+                        file:shadow-lg hover:file:shadow-xl"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload image showing area before cleanup (max 10MB)
+                    </p>
+                  </div>
+                  {errors.beforeImage && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <span className="text-red-400 mr-1">⚠️</span>
+                      {errors.beforeImage}
+                    </p>
+                  )}
+                  {beforeImage && (
+                    <div className="mt-2">
+                      <img
+                        src={URL.createObjectURL(beforeImage)}
+                        alt="Before cleanup"
+                        className="w-full h-48 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* After Image */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    ✨ After Image
+                  </label>
+                  <div
+                    className={`border-2 border-dashed ${
+                      errors.afterImage ? "border-red-400" : "border-gray-300"
+                    } 
+                    rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={afterFileInputRef}
+                      onChange={handleAfterImageChange}
+                      disabled={uploading}
+                      className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                        file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                        file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
+                        hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
+                        file:shadow-lg hover:file:shadow-xl"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload image showing area after cleanup (max 10MB)
+                    </p>
+                  </div>
+                  {errors.afterImage && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <span className="text-red-400 mr-1">⚠️</span>
+                      {errors.afterImage}
+                    </p>
+                  )}
+                  {afterImage && (
+                    <div className="mt-2">
+                      <img
+                        src={URL.createObjectURL(afterImage)}
+                        alt="After cleanup"
+                        className="w-full h-48 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-              {errors.media && (
-                <p className="text-red-500 text-sm flex items-center">
-                  <span className="text-red-400 mr-1">⚠️</span>
-                  {errors.media}
-                </p>
-              )}
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Upload Media
+                </label>
+                <div
+                  className={`border-2 border-dashed ${
+                    errors.media ? "border-red-400" : "border-gray-300"
+                  } 
+                  rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                >
+                  <input
+                    type="file"
+                    accept={category === "Tree Plantation" ? "video/*" : "image/*,video/*"}
+                    multiple
+                    ref={fileInputRef}
+                    onChange={handleMediaChange}
+                    disabled={uploading}
+                    className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                      file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                      file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
+                      hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
+                      file:shadow-lg hover:file:shadow-xl"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    {category === "Tree Plantation" 
+                      ? "🎥 Upload videos only (max 10MB each)" 
+                      : "📷 Upload up to 4 images or videos (max 10MB each)"}
+                  </p>
+                </div>
+                {errors.media && (
+                  <p className="text-red-500 text-sm flex items-center">
+                    <span className="text-red-400 mr-1">⚠️</span>
+                    {errors.media}
+                  </p>
+                )}
+              </div>
+            )}
 
             {media.length > 0 && (
               <div className="space-y-3">

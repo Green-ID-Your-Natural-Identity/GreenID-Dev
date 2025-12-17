@@ -257,6 +257,72 @@ router.post(
           console.error("ML verification failed:", err.message);
           newLog.Status = "Manual_Review";
         }
+      }
+      // 🍃 Clean-up Drive — use ML before/after image comparison
+      else if (category === "Clean-up Drive" && mediaUrls && mediaUrls.length >= 2) {
+        try {
+          // Use FormData to send before and after images to ML service
+          const FormData = (await import('form-data')).default;
+          const formData = new FormData();
+          
+          // Get before and after image URLs (expect exactly 2 images)
+          const beforeImageUrl = mediaUrls[0];
+          const afterImageUrl = mediaUrls[1];
+          
+          // Download both images from Cloudinary
+          const beforeImageResponse = await axios.get(beforeImageUrl, {
+            responseType: 'arraybuffer'
+          });
+          
+          const afterImageResponse = await axios.get(afterImageUrl, {
+            responseType: 'arraybuffer'
+          });
+          
+          // Append both images to form data
+          formData.append('before', Buffer.from(beforeImageResponse.data), {
+            filename: 'before.jpg',
+            contentType: 'image/jpeg'
+          });
+          
+          formData.append('after', Buffer.from(afterImageResponse.data), {
+            filename: 'after.jpg',
+            contentType: 'image/jpeg'
+          });
+          
+          const mlRes = await axios.post(
+            "http://127.0.0.1:5000/verify_cleanup",
+            formData,
+            {
+              headers: formData.getHeaders()
+            }
+          );
+          
+          const { is_valid, confidence, reason, details } = mlRes.data;
+          
+          newLog.modelOutput = mlRes.data;
+          newLog.source = "ml";
+          newLog.confidenceScore = confidence;
+          
+          // Decision logic
+          if (is_valid && confidence >= 0.6) {
+            newLog.Status = "Approved";
+            newLog.points = Math.round(maxPoints * confidence);
+            autoUpdated = true;
+          } else if (confidence >= 0.4 && confidence < 0.6) {
+            newLog.Status = "Manual_Review";
+          } else {
+            newLog.Status = "Rejected";
+            newLog.points = 0;
+            autoUpdated = true;
+          }
+          
+          console.log(
+            `✅ ML verified cleanup: ${reason} | Confidence: ${(confidence * 100).toFixed(2)}%`
+          );
+        } catch (err) {
+          console.error("ML cleanup verification failed:", err.message);
+          newLog.Status = "Manual_Review";
+        }
       } else {
         const confidence = dummyMLVerifier(description, category);
         newLog.confidenceScore = confidence;

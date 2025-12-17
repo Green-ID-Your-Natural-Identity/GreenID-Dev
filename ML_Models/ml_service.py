@@ -186,6 +186,26 @@ except Exception as e:
     planting_available = False
 
 
+# ============== CLEANUP VERIFICATION ==============
+
+# Import cleanup verification function
+try:
+    import importlib.util
+    cleanup_utils_file = os.path.join(os.path.dirname(__file__), "cleanup", "utils.py")
+    spec = importlib.util.spec_from_file_location("cleanup_utils", cleanup_utils_file)
+    cleanup_utils = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cleanup_utils)
+    cleanup_verify_func = cleanup_utils.verify_cleanup
+    
+    print("✅ Cleanup model loaded successfully")
+    cleanup_available = True
+except Exception as e:
+    print(f"❌ Error loading cleanup model: {e}")
+    import traceback
+    traceback.print_exc()
+    cleanup_available = False
+
+
 @app.route('/verify_planting', methods=['POST'])
 def verify_planting():
     """
@@ -272,13 +292,86 @@ def verify_planting():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/verify_cleanup', methods=['POST'])
+def verify_cleanup():
+    """
+    Verify cleanup activity via before/after image comparison
+    Expects: two image files via multipart/form-data ('before' and 'after')
+    """
+    if not cleanup_available:
+        return jsonify({"error": "Cleanup model not available"}), 500
+    
+    try:
+        # Check if both images are provided
+        if 'before' not in request.files or 'after' not in request.files:
+            return jsonify({"error": "Both before and after images required"}), 400
+        
+        before_file = request.files['before']
+        after_file = request.files['after']
+        
+        if before_file.filename == '' or after_file.filename == '':
+            return jsonify({"error": "No file selected"}), 400
+        
+        # Save to temporary files
+        temp_dir = tempfile.gettempdir()
+        before_filename = secure_filename(before_file.filename)
+        after_filename = secure_filename(after_file.filename)
+        temp_before_path = os.path.join(temp_dir, f"cleanup_before_{before_filename}")
+        temp_after_path = os.path.join(temp_dir, f"cleanup_after_{after_filename}")
+        
+        before_file.save(temp_before_path)
+        after_file.save(temp_after_path)
+        
+        # Run cleanup verification
+        result = cleanup_verify_func(
+            temp_before_path,
+            temp_after_path,
+            confidence_threshold=0.5,
+            log_details=True
+        )
+        
+        # Clean up temp files
+        os.remove(temp_before_path)
+        os.remove(temp_after_path)
+        
+        # Calculate overall confidence
+        avg_confidence = (result['before_confidence'] + result['after_confidence']) / 2
+        
+        response = {
+            "is_valid": result['verified'],
+            "confidence": avg_confidence,
+            "reason": result['reason'],
+            "details": {
+                "before": {
+                    "predicted_class": result['before_class'],
+                    "confidence": result['before_confidence'],
+                    "probabilities": result['before_probs']
+                },
+                "after": {
+                    "predicted_class": result['after_class'],
+                    "confidence": result['after_confidence'],
+                    "probabilities": result['after_probs']
+                }
+            }
+        }
+        
+        return jsonify(response)
+    
+    except Exception as e:
+        print(f"❌ Cleanup verification error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
     return jsonify({
         "status": "running",
         "public_transport_model_loaded": pt_model is not None,
-        "planting_model_loaded": planting_available
+        "planting_model_loaded": planting_available,
+        "cleanup_model_loaded": cleanup_available
     })
 
 
@@ -288,5 +381,6 @@ if __name__ == '__main__':
     print("  POST /verify_walk - Walk verification")
     print("  POST /verify_public_transport - Public transport image verification")
     print("  POST /verify_planting - Tree planting video verification")
+    print("  POST /verify_cleanup - Cleanup drive before/after verification")
     print("  GET  /health - Health check")
     app.run(debug=True, port=5000)
