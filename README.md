@@ -66,9 +66,6 @@ An intelligent chatbot powered by Google's Gemini AI to assist users with green 
 
 ---
 ## Project Images 
-- ### **Login**
-  
-  <img width="753" height="753" alt="image" src="https://github.com/user-attachments/assets/22b732de-fa93-4b06-ba47-615f83b0fcc9" />
 
 - ### **Landing-Page**
   
@@ -78,6 +75,9 @@ An intelligent chatbot powered by Google's Gemini AI to assist users with green 
   <img width="1893" height="921" alt="image" src="https://github.com/user-attachments/assets/151f8b3f-0b73-4d76-96be-51003ebc2539" />
   
 ### **Further UI is still in developing stage**
+
+- ### **Login**
+  <img width="753" height="753" alt="image" src="https://github.com/user-attachments/assets/22b732de-fa93-4b06-ba47-615f83b0fcc9" />
 
 - ### **Profile**
   <img width="1131" height="751" alt="image" src="https://github.com/user-attachments/assets/43ff4d3c-ca46-4aba-afd7-7b0034443d16" />
