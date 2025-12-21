@@ -65,6 +65,25 @@ An intelligent chatbot powered by Google's Gemini AI to assist users with green 
 - **Models**: MobileNetV2, YOLOv8 (for object detection)
 
 ---
+## Project Images 
+- **Login**
+  <img width="815" height="756" alt="image" src="https://github.com/user-attachments/assets/b8041649-48c6-431b-87de-eafd47c2f364" />
+- **Landing-Page**
+  <img width="1902" height="927" alt="image" src="https://github.com/user-attachments/assets/21e5a93e-9696-4cfa-9682-ab7ef7de7474" />
+  <img width="1893" height="910" alt="image" src="https://github.com/user-attachments/assets/af95c055-f591-413a-857d-bc60e7a0c9cf" />
+  <img width="1899" height="926" alt="image" src="https://github.com/user-attachments/assets/1ec0c7fc-603b-4e1e-87b6-b4646de41010" />
+  <img width="1893" height="921" alt="image" src="https://github.com/user-attachments/assets/151f8b3f-0b73-4d76-96be-51003ebc2539" />
+  
+**Further UI is still in developing stage**
+
+- **Profile**
+  <img width="1131" height="751" alt="image" src="https://github.com/user-attachments/assets/43ff4d3c-ca46-4aba-afd7-7b0034443d16" />
+- **Activity-Log**
+  <img width="1066" height="905" alt="image" src="https://github.com/user-attachments/assets/b52ccb7e-919c-4202-95f4-c1b6682f12be" />
+  <img width="1222" height="377" alt="image" src="https://github.com/user-attachments/assets/f2739514-444b-4658-a9b9-680e01a6a443" />
+- **Admin-Panel**
+  <img width="1598" height="907" alt="image" src="https://github.com/user-attachments/assets/c46b51b5-190b-491f-a80c-84f74c5e69a8" />
+  <img width="1600" height="911" alt="image" src="https://github.com/user-attachments/assets/d8556a3e-9100-4516-8dff-66a1d2ca86a8" />
 
 ## ⚙️ Setup & Installation
 
