@@ -81,7 +81,7 @@ const Login = () => {
     <div>
       <div className="flex justify-center items-center h-[90vh] text-black rounded w-2xl bg-green-100">
       <div className="bg-white p-8 rounded shadow-md ">
-        <h2 className="text-2xl font-bold mb-6 text-center text-green-600">DARShan Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-green-600">GreenID Login</h2>
 
         <form className="flex flex-col gap-4" onSubmit={handleLogin}>
             <input 
