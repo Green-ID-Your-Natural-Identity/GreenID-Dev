@@ -21,6 +21,14 @@ import LandingPage from './pages/LandingPage'
 function App() {
   return (
     <>
+      {/* 📱 Mobile Restricted Overlay */}
+      <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-8 md:hidden text-white">
+        <h1 className="text-xl font-medium mb-3">Desktop View Only</h1>
+        <p className="text-sm opacity-80 font-light">
+          Please access GreenID on a computer for the best experience.
+        </p>
+      </div>
+
       <Routes>
         {/* 🌱 User Routes */}
         <Route path="/" element={<LandingPage />} />
