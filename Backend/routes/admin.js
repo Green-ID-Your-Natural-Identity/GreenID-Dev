@@ -119,16 +119,34 @@ router.get('/users', requireAdminAuth, async (req, res) => {
     if (search) {
       // Search username or _id (user id)
       query.$or = [
-        { username: new RegExp(search, 'i') },
-        { _id: search },
-        { name: new RegExp(search, 'i') },
+        { fullName: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { uid: search },
       ];
     }
+    
     const users = await User.find(query)
-      .select('_id username totalPoints') // select fields to send
+      .select('_id uid fullName email')
       .limit(50)
       .lean();
-    res.json({ users });
+
+    // Calculate total points for each user from ActivityLogs
+    const usersWithPoints = await Promise.all(
+      users.map(async (user) => {
+        const logs = await ActivityLog.find({ uid: user.uid }).lean();
+        const totalPoints = logs.reduce((sum, log) => sum + (log.points || 0), 0);
+        const activityCount = logs.length;
+        
+        return {
+          ...user,
+          totalPoints,
+          activityCount,
+          username: user.fullName || user.email?.split('@')[0] || 'No Name'
+        };
+      })
+    );
+
+    res.json({ users: usersWithPoints });
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users' });
@@ -148,6 +166,49 @@ router.get('/users/:id/logs', requireAdminAuth, async (req, res) => {
     res.status(500).json({ message: 'Error fetching user logs' });
   }
 });
+
+// PATCH /api/admin/logs/:id/edit-points => edit points for an activity
+router.patch('/logs/:id/edit-points', requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
+  const { points } = req.body;
+
+  if (typeof points !== 'number' || points < 0) {
+    return res.status(400).json({ message: 'Invalid points value' });
+  }
+
+  try {
+    const log = await ActivityLog.findById(id);
+    if (!log) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+
+    log.points = points;
+    await log.save();
+
+    res.json({ message: 'Points updated successfully', log });
+  } catch (error) {
+    console.error('Error updating points:', error);
+    res.status(500).json({ message: 'Error updating points' });
+  }
+});
+
+// DELETE /api/admin/logs/:id => completely reject/delete an activity
+router.delete('/logs/:id', requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const log = await ActivityLog.findByIdAndDelete(id);
+    if (!log) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+
+    res.json({ message: 'Activity deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting activity:', error);
+    res.status(500).json({ message: 'Error deleting activity' });
+  }
+});
+
 
 
 // 🔐 Example protected route

@@ -25,10 +25,11 @@ function App() {
         {/* 🌱 User Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/form" element={<ProfileForm />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/activity-log" element={<><ActivityLogPage /><HariBabaChat /></>} />
+        <Route path="/activity-log" element={<ActivityLogPage />} />
         <Route path="/chatbot" element={<ChatBot />} />
 
         {/* 🛡 Admin Routes */}

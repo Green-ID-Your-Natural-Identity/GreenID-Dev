@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import PlantSpline from '../components/PlantSpline'
 import Spline from '@splinetool/react-spline'
 import Family from '../components/Family'
@@ -11,7 +12,10 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaGithub } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
 
+
 const LandingPage = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className='w-screen h-screen overflow-x-hidden '>
       {/* navbar */}
@@ -26,8 +30,8 @@ const LandingPage = () => {
               <a href=""><div className='hover:bg-[#00bf63] px-4 py-2 rounded-xl transition duration-200 ease-in-out'>About Us</div></a>
           </div>
           <div className='flex gap-5'>
-              <button className='border-1 px-5 py-3 hover:bg-[#ffffff] hover:text-black font-bold rounded-4xl'>Sign-Up</button>
-              <button className='border-1 px-5 py-3 bg-[#ffffff] text-black font-bold rounded-4xl'>Log-In</button>
+              <button onClick={() => navigate('/signup')} className='border-1 px-5 py-3 hover:bg-[#ffffff] hover:text-black font-bold rounded-4xl'>Sign-Up</button>
+              <button onClick={() => navigate('/login')} className='border-1 px-5 py-3 bg-[#ffffff] text-black font-bold rounded-4xl'>Log-In</button>
           </div>
       </div>
 
@@ -36,7 +40,7 @@ const LandingPage = () => {
         <div className='h-[85vh]  w-[55%] flex flex-col pt-30 items-center px-30'>
           <h1 className='hero text-6xl mb-8 font-medium'>Green ID : Your Badge for a Greener Tomorrow</h1>
           <p className='text-2xl mb-12'>Earn points for your everyday eco-actions. Track your impact, unlock rewards, and join a community of changemakers.</p>
-          <button className='border-3 rounded-3xl px-5 py-2 text-xl bg-[#00bf63] hover:bg-[#274536] font-extrabold'>Start Now</button>
+          <button onClick={() => navigate('/signup')} className='border-3 rounded-3xl px-5 py-2 text-xl bg-[#00bf63] hover:bg-[#274536] font-extrabold'>Start Now</button>
         </div>
         <div className='h-[85vh] w-[45%]'><PlantSpline/></div>
       </div>
