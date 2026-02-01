@@ -26,6 +26,9 @@ This guide will walk you through deploying the GreenID application for free usin
         *   `CLOUDINARY_API_KEY`: Your Cloudinary API key.
         *   `CLOUDINARY_API_SECRET`: Your Cloudinary secret.
         *   `GEMINI_API_KEY`: Your Google Gemini API key.
+        *   `ADMIN_USERNAME`: `Admin` (or your preferred admin username).
+        *   `ADMIN_PASSWORD`: `Admin123` (or your preferred admin password).
+        *   `SESSION_SECRET`: `mysecuresecret` (or a random secure string).
         *   `ML_SERVICE_URL`: `https://greenid-ml-service.onrender.com` (You will update this *after* deploying the ML service).
         *   `FRONTEND_URL`: `https://your-vercel-app.vercel.app` (You will update this *after* deploying the frontend).
 6.  **Deploy**: Click **Create Web Service**.
