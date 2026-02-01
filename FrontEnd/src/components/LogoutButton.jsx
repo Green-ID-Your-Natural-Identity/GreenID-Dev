@@ -12,7 +12,7 @@ const LogoutButton = () => {
     try {
       await signOut(auth);
       setUser(null); // clears context & localStorage
-      navigate('/');
+      navigate('/login');
     } catch (err) {
       console.error('Logout Error:', err);
     }

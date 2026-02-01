@@ -23,8 +23,8 @@ function App() {
     <>
       <Routes>
         {/* 🌱 User Routes */}
-        <Route path="/land" element={<LandingPage />} />
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/form" element={<ProfileForm />} />
         <Route path="/profile" element={<ProfilePage />} />
