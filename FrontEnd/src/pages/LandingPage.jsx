@@ -55,7 +55,7 @@ const LandingPage = () => {
             <span className='hover:shadow-[0_0_80px]
          hover:shadow-green-300'> <ProfileCard/></span> 
           </div>
-          <div className='pl-10 border  bg-[#f0f6eb0e] rounded-4xl w-[50] flex flex-col px-15 pt-15 ml-5 drop-shadow-[0_4px_100px_rgba(137,101,255,1)] hover:drop-shadow-[0_0px_100px_rgba(74,222,128,0.5)] transition-all duration-1000 ease-in-out hover:shadow-[0_0_50px]
+          <div className='pl-10 border  bg-[#f0f6eb0e] rounded-4xl w-[50%] flex flex-col px-15 pt-15 ml-5 drop-shadow-[0_4px_100px_rgba(137,101,255,1)] hover:drop-shadow-[0_0px_100px_rgba(74,222,128,0.5)] transition-all duration-1000 ease-in-out hover:shadow-[0_0_50px]
          hover:shadow-green-300' >
             <div className=' text-3xl pl-20 text-left'>Our mission is simple yet powerful:</div>
             <div className='flex flex-col gap-10 text-2xl text-left items-center justify-between px-20 pt-10'>
