@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
+import FloatingChatWidget from "../components/FloatingChatWidget";
 
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
@@ -846,6 +847,9 @@ const ActivityLogPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Floating Chat Widget */}
+      <FloatingChatWidget />
     </div>
   );
 };
