@@ -4,6 +4,7 @@ import { uploadActivityMedia } from "../middleware/multer.js";
 import axios from "axios";
 
 const router = express.Router();
+const ML_URL = process.env.ML_SERVICE_URL || "http://127.0.0.1:5000";
 
 // 📍 Category-wise max point config
 const activityOptions = [
@@ -99,7 +100,7 @@ router.post(
       ) {
         try {
           const flaskRes = await axios.post(
-            "http://127.0.0.1:5000/verify_walk",
+            `${ML_URL}/verify_walk`,
             {
               coordinates,
             }
@@ -155,7 +156,7 @@ router.post(
             });
             
             const mlRes = await axios.post(
-              "http://127.0.0.1:5000/verify_planting",
+              `${ML_URL}/verify_planting`,
               formData,
               {
                 headers: formData.getHeaders()
@@ -211,7 +212,7 @@ router.post(
           });
           
           const mlRes = await axios.post(
-            "http://127.0.0.1:5000/verify_public_transport",
+            `${ML_URL}/verify_public_transport`,
             formData,
             {
               headers: formData.getHeaders()
@@ -281,7 +282,7 @@ router.post(
           });
           
           const mlRes = await axios.post(
-            "http://127.0.0.1:5000/verify_cleanup",
+            `${ML_URL}/verify_cleanup`,
             formData,
             {
               headers: formData.getHeaders()

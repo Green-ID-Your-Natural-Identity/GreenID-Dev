@@ -12,7 +12,9 @@ import tempfile
 import cv2
 
 app = Flask(__name__)
-CORS(app)  # Allow requests from Node.js backend
+# Allow requests from Node.js backend or Frontend
+allowed_origins = os.environ.get("FRONTEND_URL", "*") 
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
 
 # ============== WALK VERIFICATION ==============
 def haversine(lat1, lon1, lat2, lon2):

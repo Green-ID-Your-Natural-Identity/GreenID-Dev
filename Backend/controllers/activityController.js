@@ -11,8 +11,9 @@ exports.verifyWalkActivity = async (req, res) => {
       return res.status(400).json({ error: "No GPS coordinates found" });
     }
 
+    const ML_URL = process.env.ML_SERVICE_URL || "http://127.0.0.1:5000";
     // Send coordinates to Flask service
-    const response = await axios.post("http://localhost:5000/verify_walk", {
+    const response = await axios.post(`${ML_URL}/verify_walk`, {
       coordinates: activity.coordinates,
     });
 
