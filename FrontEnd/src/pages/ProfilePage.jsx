@@ -351,8 +351,15 @@ const ProfilePage = () => {
                                             {selectedActivity.category || 'Eco Activity'}
                                         </h3>
                                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                🌱 Verified
+                                            <span className={`flex items-center gap-1 font-semibold ${
+                                                selectedActivity.Status === 'Approved' 
+                                                    ? 'text-green-600' 
+                                                    : selectedActivity.Status === 'Rejected' 
+                                                    ? 'text-red-500' 
+                                                    : 'text-yellow-600'
+                                            }`}>
+                                                {selectedActivity.Status === 'Approved' ? '✅ Verified' : 
+                                                 selectedActivity.Status === 'Rejected' ? '❌ Rejected' : '⏳ Pending'}
                                             </span>
                                             <span>•</span>
                                             <span>{new Date(selectedActivity.createdAt).toLocaleDateString('en-US', { 
@@ -381,11 +388,11 @@ const ProfilePage = () => {
                                 </div>
 
                                 {/* Additional Info */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div className="bg-blue-50 rounded-xl p-4">
                                         <p className="text-sm text-blue-600 font-medium mb-1">Status</p>
                                         <p className="text-lg font-semibold text-blue-900">
-                                            {selectedActivity.verificationStatus || 'Verified'}
+                                            {selectedActivity.Status || 'Pending'}
                                         </p>
                                     </div>
                                     <div className="bg-purple-50 rounded-xl p-4">
@@ -394,6 +401,22 @@ const ProfilePage = () => {
                                             {selectedActivity.points >= 50 ? 'High' : selectedActivity.points >= 20 ? 'Medium' : 'Standard'}
                                         </p>
                                     </div>
+                                    {selectedActivity.confidenceScore != null && (
+                                        <div className="bg-indigo-50 rounded-xl p-4">
+                                            <p className="text-sm text-indigo-600 font-medium mb-1">AI Confidence</p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 bg-indigo-200 h-2 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full bg-indigo-600 rounded-full"
+                                                        style={{ width: `${selectedActivity.confidenceScore * 100}%` }}
+                                                    ></div>
+                                                </div>
+                                                <p className="text-lg font-semibold text-indigo-900">
+                                                    {Math.round(selectedActivity.confidenceScore * 100)}%
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

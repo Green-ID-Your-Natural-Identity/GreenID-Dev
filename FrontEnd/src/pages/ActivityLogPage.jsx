@@ -11,21 +11,12 @@ const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
   { label: "🚴‍♀️ Sustainable Commute", value: "Sustainable Commute", points: 10 },
   { label: "🚌 Public Transport", value: "Public Transport", points: 15 },
-  { label: "🔁 Recycling & Reuse", value: "Recycling & Reuse", points: 15 },
-  {
-    label: "♻️ Plastic Waste Reduction",
-    value: "Plastic Waste Reduction",
-    points: 5,
-  },
-  { label: "🌞 Energy Saving", value: "Energy Saving", points: 8 },
-  { label: "💧 Water Conservation", value: "Water Conservation", points: 10 },
   {
     label: "📚 Sustainability Awareness",
     value: "Sustainability Awareness",
     points: 30,
   },
   { label: "🍃 Clean-up Drives", value: "Clean-up Drive", points: 25 },
-  { label: "🌿 Urban Gardening", value: "Urban Gardening", points: 15 },
   { label: "🧼 Watering Plants", value: "Watering Plants", points: 2 },
   { label: "Others", value: "others", points: 10 },
 ];
