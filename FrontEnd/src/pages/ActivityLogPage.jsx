@@ -74,7 +74,7 @@ const ActivityLogPage = () => {
   const fetchLogs = useCallback(async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/users/get-user-profile?uid=${uid}`
+        `${import.meta.env.VITE_API_URL}/api/users/get-user-profile?uid=${uid}`
       );
       setLogs(res.data.activityLogs || []);
     } catch (err) {
@@ -298,7 +298,7 @@ const ActivityLogPage = () => {
 
     setUploading(true);
     try {
-      await axios.post("http://localhost:5000/api/activity/create-log", form, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/activity/create-log`, form, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) =>
           setProgress(Math.round((e.loaded * 100) / e.total)),

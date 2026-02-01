@@ -20,7 +20,7 @@ export default function UserProfiles() {
     try {
       setError('');
       setLoadingUsers(true);
-      const response = await axios.get('http://localhost:5000/api/admin/users', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
         withCredentials: true,
       });
       setUsers(response.data.users || []);
@@ -36,7 +36,7 @@ export default function UserProfiles() {
     try {
       setError('');
       setLoadingUsers(true);
-      const response = await axios.get('http://localhost:5000/api/admin/users', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
         params: { search },
         withCredentials: true,
       });
@@ -53,7 +53,7 @@ export default function UserProfiles() {
     try {
       setError('');
       setLoadingLogs(true);
-      const response = await axios.get(`http://localhost:5000/api/admin/users/${userId}/logs`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}/logs`, {
         withCredentials: true,
       });
       setSelectedUserLogs(response.data.logs || []);
@@ -95,7 +95,7 @@ export default function UserProfiles() {
 
     try {
       await axios.patch(
-        `http://localhost:5000/api/admin/logs/${logId}/edit-points`,
+        `${import.meta.env.VITE_API_URL}/api/admin/logs/${logId}/edit-points`,
         { points },
         { withCredentials: true }
       );
@@ -116,7 +116,7 @@ export default function UserProfiles() {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/admin/logs/${logId}`,
+        `${import.meta.env.VITE_API_URL}/api/admin/logs/${logId}`,
         { withCredentials: true }
       );
       alert('Activity deleted successfully!');

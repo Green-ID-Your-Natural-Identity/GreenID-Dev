@@ -9,7 +9,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Check admin session
-    axios.get('http://localhost:5000/api/admin/check-auth', { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_API_URL}/api/admin/check-auth`, { withCredentials: true })
       .then(() => {
         fetchStats();
       })
@@ -20,8 +20,8 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const pendingRes = await axios.get('http://localhost:5000/api/admin/logs/pending', { withCredentials: true });
-      const usersRes = await axios.get('http://localhost:5000/api/admin/users/count', { withCredentials: true });
+      const pendingRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/logs/pending`, { withCredentials: true });
+      const usersRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users/count`, { withCredentials: true });
 
       setPendingCount(pendingRes.data.count);
       setUserCount(usersRes.data.count);
@@ -31,7 +31,7 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    await axios.post('http://localhost:5000/api/admin/logout', {}, { withCredentials: true });
+    await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/logout`, {}, { withCredentials: true });
     navigate('/admin/login');
   };
 

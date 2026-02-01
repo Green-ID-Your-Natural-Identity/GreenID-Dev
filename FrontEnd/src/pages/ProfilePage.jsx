@@ -17,7 +17,7 @@ const ProfilePage = () => {
     useEffect(() => {
         if (!user?.uid) return;
 
-        fetch(`http://localhost:5000/api/users/get-user-profile?uid=${user.uid}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/users/get-user-profile?uid=${user.uid}`)
             .then(res => res.json())
             .then(data => {
                 setUserData(data.user);
@@ -39,7 +39,7 @@ const ProfilePage = () => {
 
     if (!userData) {
         return (
-            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-200 via-white to-green-200">
+            <div className="min-h-screen min-w-[100vw] flex items-center justify-center bg-gradient-to-br from-blue-200 via-white to-green-200">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600 font-medium">Loading your profile...</p>

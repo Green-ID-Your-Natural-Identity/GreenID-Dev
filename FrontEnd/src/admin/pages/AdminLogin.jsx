@@ -13,7 +13,7 @@ const AdminLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/admin/login', { username, password }, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/login`, { username, password }, {
         withCredentials: true // important for sending cookies
       });
 

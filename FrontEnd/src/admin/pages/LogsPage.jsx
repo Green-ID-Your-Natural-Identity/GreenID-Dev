@@ -10,7 +10,7 @@ export default function LogsPage() {
   async function fetchLogs() {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/admin/logs/pending-logs', { withCredentials: true });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/logs/pending-logs`, { withCredentials: true });
       setLogs(response.data.logs);
       setLoading(false);
     } catch (error) {
@@ -26,7 +26,7 @@ export default function LogsPage() {
   // Approve or Reject log
   async function verifyLog(id, status) {
     try {
-      await axios.patch(`http://localhost:5000/api/admin/logs/${id}/verify`, { status }, { withCredentials: true });
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/admin/logs/${id}/verify`, { status }, { withCredentials: true });
       // Optimistic UI update: filter out the log or update status
       setLogs(prevLogs => prevLogs.filter(log => log._id !== id));
     } catch (error) {
