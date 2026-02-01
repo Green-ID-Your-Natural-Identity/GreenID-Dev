@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
-import LogoutButton from "../components/logoutbutton";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 const activityOptions = [
   { label: "🌳 Tree Plantation", value: "Tree Plantation", points: 20 },
@@ -45,8 +47,19 @@ const ActivityLogPage = () => {
   const [coordinates, setCoordinates] = useState([]);
   const [isMarkingWalk, setIsMarkingWalk] = useState(false);
 
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const uid = user?.uid;
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout Error:', err);
+    }
+  };
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -357,400 +370,438 @@ const ActivityLogPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {user && (
-          <div className="flex justify-end mb-6">
-            <LogoutButton />
-          </div>
-        )}
-
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-green-600 mb-3">
-              📝 Log New Activity
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Make a positive impact and earn points!
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Activity Category
-              </label>
-              <select
-                className={`w-full border-2 ${
-                  errors.category
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-gray-300 focus:border-green-500"
-                } 
-                  rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 text-lg bg-white text-gray-800
-                  transition-all duration-200 hover:border-green-400`}
-                value={category}
-                onChange={handleCategoryChange}
-                required
-              >
-                <option value="" disabled>
-                  🌍 Select Activity Category
-                </option>
-                {activityOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-                {/* (+{o.points} pts) */}
-              </select>
-              {errors.category && (
-                <p className="text-red-500 text-sm flex items-center">
-                  <span className="text-red-400 mr-1">⚠️</span>
-                  {errors.category}
-                </p>
-              )}
-            </div>
-            {console.log("Selected category:", category)}
-            {category === "Sustainable Commute" && (
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
-                <p className="text-blue-800 font-semibold mb-2">
-                  🚶 Walking Tracker
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={markStart}
-                    disabled={coordinates.length > 0}
-                    className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all"
-                  >
-                    Mark Start
-                  </button>
-                  <button
-                    type="button"
-                    onClick={markEnd}
-                    disabled={
-                      coordinates.length === 0 || coordinates.length >= 2
-                    }
-                    className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all"
-                  >
-                    Mark End
-                  </button>
-                </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  {coordinates.length === 0
-                    ? "No points marked yet."
-                    : coordinates.length === 1
-                    ? "Start point recorded."
-                    : "✅ Start & End recorded."}
-                </p>
-              </div>
-            )}
-
-            {points > 0 && (
-              <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200 rounded-2xl p-4">
-                <p className="text-green-800 font-semibold flex items-center">
-                  <span className="text-green-600 mr-2">🏆</span>
-                  You'll earn <span className="font-bold mx-1">
-                    {points}
-                  </span>{" "}
-                  points for this activity!
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Description
-              </label>
-              <textarea
-                className={`w-full border-2 ${
-                  errors.description
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-gray-300 focus:border-green-500"
-                } 
-                  rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 resize-y h-32 text-lg bg-white text-gray-800
-                  transition-all duration-200 hover:border-green-400`}
-                placeholder="Tell us about your eco-friendly activity... 🌱"
-                value={description}
-                onChange={handleDescriptionChange}
-                required
+    <div className="min-h-screen min-w-[100vw] bg-gradient-to-br from-blue-200 via-white to-green-200 overflow-x-hidden">
+      {/* Navigation Bar - Glass Effect (Exact same as ProfilePage) */}
+      <nav className="bg-white/10 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo/Brand */}
+            <div className="flex items-center gap-3">
+              <img 
+                src="/Purple1.png" 
+                alt="GreenID Logo" 
+                className="h-16"
               />
-              {errors.description && (
-                <p className="text-red-500 text-sm flex items-center">
-                  <span className="text-red-400 mr-1">⚠️</span>
-                  {errors.description}
-                </p>
-              )}
             </div>
 
-            {/* Conditional rendering for Clean-up Drive vs other categories */}
-            {category === "Clean-up Drive" ? (
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700">Upload Before & After Images</h4>
-                
-                {/* Before Image */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    📸 Before Image
-                  </label>
-                  <div
-                    className={`border-2 border-dashed ${
-                      errors.beforeImage ? "border-red-400" : "border-gray-300"
-                    } 
-                    rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={beforeFileInputRef}
-                      onChange={handleBeforeImageChange}
-                      disabled={uploading}
-                      className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
-                        file:rounded-xl file:border-0 file:text-sm file:font-semibold
-                        file:bg-gradient-to-r file:from-blue-500 file:to-blue-600 file:text-white
-                        hover:file:from-blue-600 hover:file:to-blue-700 file:transition-all file:duration-200
-                        file:shadow-lg hover:file:shadow-xl"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Upload image showing area before cleanup (max 10MB)
-                    </p>
-                  </div>
-                  {errors.beforeImage && (
-                    <p className="text-red-500 text-sm flex items-center">
-                      <span className="text-red-400 mr-1">⚠️</span>
-                      {errors.beforeImage}
-                    </p>
-                  )}
-                  {beforeImage && (
-                    <div className="mt-2">
-                      <img
-                        src={URL.createObjectURL(beforeImage)}
-                        alt="Before cleanup"
-                        className="w-full h-48 object-cover rounded-xl shadow-md"
-                      />
-                    </div>
-                  )}
-                </div>
+            {/* Nav Links */}
+            <div className="hidden md:flex items-center gap-1">
+              <button
+                onClick={() => navigate('/home')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium transition-all"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium transition-all"
+              >
+                Profile
+              </button>
+              <button
+                onClick={() => navigate('/activity-log')}
+                className="px-4 py-2 text-gray-900 bg-white/70 rounded-lg font-semibold shadow-sm"
+              >
+                Activity Log
+              </button>
+              <button
+                onClick={() => navigate('/chatbot')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-white/50 rounded-lg font-medium transition-all"
+              >
+                Chatbot
+              </button>
+            </div>
 
-                {/* After Image */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    ✨ After Image
-                  </label>
-                  <div
-                    className={`border-2 border-dashed ${
-                      errors.afterImage ? "border-red-400" : "border-gray-300"
-                    } 
-                    rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={afterFileInputRef}
-                      onChange={handleAfterImageChange}
-                      disabled={uploading}
-                      className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
-                        file:rounded-xl file:border-0 file:text-sm file:font-semibold
-                        file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
-                        hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
-                        file:shadow-lg hover:file:shadow-xl"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Upload image showing area after cleanup (max 10MB)
-                    </p>
-                  </div>
-                  {errors.afterImage && (
-                    <p className="text-red-500 text-sm flex items-center">
-                      <span className="text-red-400 mr-1">⚠️</span>
-                      {errors.afterImage}
-                    </p>
-                  )}
-                  {afterImage && (
-                    <div className="mt-2">
-                      <img
-                        src={URL.createObjectURL(afterImage)}
-                        alt="After cleanup"
-                        className="w-full h-48 object-cover rounded-xl shadow-md"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  Upload Media
-                </label>
-                <div
-                  className={`border-2 border-dashed ${
-                    errors.media ? "border-red-400" : "border-gray-300"
-                  } 
-                  rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
-                >
-                  <input
-                    type="file"
-                    accept={category === "Tree Plantation" ? "video/*" : "image/*,video/*"}
-                    multiple
-                    ref={fileInputRef}
-                    onChange={handleMediaChange}
-                    disabled={uploading}
-                    className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
-                      file:rounded-xl file:border-0 file:text-sm file:font-semibold
-                      file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
-                      hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
-                      file:shadow-lg hover:file:shadow-xl"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    {category === "Tree Plantation" 
-                      ? "🎥 Upload videos only (max 10MB each)" 
-                      : "📷 Upload up to 4 images or videos (max 10MB each)"}
-                  </p>
-                </div>
-                {errors.media && (
-                  <p className="text-red-500 text-sm flex items-center">
-                    <span className="text-red-400 mr-1">⚠️</span>
-                    {errors.media}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {media.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="font-semibold text-gray-700">Media Preview:</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {media.map((f, idx) => {
-                    const url = URL.createObjectURL(f);
-                    return (
-                      <div key={idx} className="relative group">
-                        {f.type.startsWith("video/") ? (
-                          <video
-                            src={url}
-                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
-                          />
-                        ) : (
-                          <img
-                            src={url}
-                            className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
-                          />
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeMedia(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 
-                            opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-110"
-                        >
-                          <span className="text-xs font-bold">✕</span>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {uploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Uploading...</span>
-                  <span>{progress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 ease-out shadow-sm"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
+            {/* Logout Button */}
             <button
-              type="submit"
-              disabled={uploading}
-              className={`w-full py-4 rounded-2xl text-xl font-bold text-white shadow-lg transform transition-all duration-200
-                ${
-                  uploading
-                    ? "bg-gray-400 cursor-not-allowed scale-100"
-                    : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 hover:shadow-xl active:scale-95"
-                }
-              `}
+              onClick={handleLogout}
+              className="px-5 py-2 bg-gray-900/90 hover:bg-gray-900 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
             >
-              {uploading ? (
-                <span className="flex items-center justify-center">
-                  <span className="animate-spin mr-2">⏳</span>
-                  Uploading {progress}%...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  <span className="mr-2">🚀</span>
-                  Log Activity
-                </span>
-              )}
+              Logout
             </button>
-          </form>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-          <div className="flex items-center mb-6">
-            <h3 className="text-3xl font-bold text-green-600">
-              📜 Past Activities
-            </h3>
-            {logs.length > 0 && (
-              <span className="ml-4 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                {logs.length} {logs.length === 1 ? "activity" : "activities"}
-              </span>
-            )}
           </div>
+        </div>
+      </nav>
 
-          {logs.length > 0 ? (
-            <div className="space-y-6">
-              {[...logs].reverse().map((log) => (
-                <div
-                  key={log._id}
-                  className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-100 
-                  rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-16 h-16">
-                      {log.media?.length > 0 ? (
-                        <div className="relative">
-                          {isVideo(log.media[0]) ? (
-                            <video
-                              src={log.media[0]}
-                              className="w-16 h-16 object-cover rounded-xl shadow-md"
-                            />
-                          ) : (
-                            <img
-                              src={log.media[0]}
-                              alt="activity thumbnail"
-                              className="w-16 h-16 object-cover rounded-xl shadow-md"
-                            />
-                          )}
-                          {log.media.length > 1 && (
-                            <span className="absolute -bottom-1 -right-1 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                              +{log.media.length - 1}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="w-16 h-16 bg-green-200 rounded-xl flex items-center justify-center text-2xl">
-                          🌱
+      {/* Main Content - Two Column Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Log Form (2/3 width) */}
+          <div className="lg:col-span-2">
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                  📝 Log New Activity
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  Make a positive impact and earn points!
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Activity Category
+                  </label>
+                  <select
+                    className={`w-full border-2 ${
+                      errors.category
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-gray-300 focus:border-green-500"
+                    } 
+                      rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 text-lg bg-white text-gray-800
+                      transition-all duration-200 hover:border-green-400`}
+                    value={category}
+                    onChange={handleCategoryChange}
+                    required
+                  >
+                    <option value="" disabled>
+                      🌍 Select Activity Category
+                    </option>
+                    {activityOptions.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.category && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <span className="text-red-400 mr-1">⚠️</span>
+                      {errors.category}
+                    </p>
+                  )}
+                </div>
+
+                {category === "Sustainable Commute" && (
+                  <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                    <p className="text-blue-800 font-semibold mb-2">
+                      🚶 Walking Tracker
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={markStart}
+                        disabled={coordinates.length > 0}
+                        className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all disabled:bg-gray-400"
+                      >
+                        Mark Start
+                      </button>
+                      <button
+                        type="button"
+                        onClick={markEnd}
+                        disabled={
+                          coordinates.length === 0 || coordinates.length >= 2
+                        }
+                        className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all disabled:bg-gray-400"
+                      >
+                        Mark End
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">
+                      {coordinates.length === 0
+                        ? "No points marked yet."
+                        : coordinates.length === 1
+                        ? "Start point recorded."
+                        : "✅ Start & End recorded."}
+                    </p>
+                  </div>
+                )}
+
+                {points > 0 && (
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200 rounded-2xl p-4">
+                    <p className="text-green-800 font-semibold flex items-center">
+                      <span className="text-green-600 mr-2">🏆</span>
+                      You'll earn <span className="font-bold mx-1">
+                        {points}
+                      </span>{" "}
+                      points for this activity!
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    className={`w-full border-2 ${
+                      errors.description
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-gray-300 focus:border-green-500"
+                    } 
+                      rounded-2xl p-4 focus:outline-none focus:ring-4 focus:ring-green-100 resize-y h-32 text-lg bg-white text-gray-800
+                      transition-all duration-200 hover:border-green-400`}
+                    placeholder="Tell us about your eco-friendly activity... 🌱"
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    required
+                  />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <span className="text-red-400 mr-1">⚠️</span>
+                      {errors.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Conditional rendering for Clean-up Drive vs other categories */}
+                {category === "Clean-up Drive" ? (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-gray-700">Upload Before & After Images</h4>
+                    
+                    {/* Before Image */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700">
+                        📸 Before Image
+                      </label>
+                      <div
+                        className={`border-2 border-dashed ${
+                          errors.beforeImage ? "border-red-400" : "border-gray-300"
+                        } 
+                        rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={beforeFileInputRef}
+                          onChange={handleBeforeImageChange}
+                          disabled={uploading}
+                          className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                            file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                            file:bg-gradient-to-r file:from-blue-500 file:to-blue-600 file:text-white
+                            hover:file:from-blue-600 hover:file:to-blue-700 file:transition-all file:duration-200
+                            file:shadow-lg hover:file:shadow-xl"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                          Upload image showing area before cleanup (max 10MB)
+                        </p>
+                      </div>
+                      {errors.beforeImage && (
+                        <p className="text-red-500 text-sm flex items-center">
+                          <span className="text-red-400 mr-1">⚠️</span>
+                          {errors.beforeImage}
+                        </p>
+                      )}
+                      {beforeImage && (
+                        <div className="mt-2">
+                          <img
+                            src={URL.createObjectURL(beforeImage)}
+                            alt="Before cleanup"
+                            className="w-full h-48 object-cover rounded-xl shadow-md"
+                          />
                         </div>
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="text-xl font-bold text-green-800">
+                    {/* After Image */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700">
+                        ✨ After Image
+                      </label>
+                      <div
+                        className={`border-2 border-dashed ${
+                          errors.afterImage ? "border-red-400" : "border-gray-300"
+                        } 
+                        rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={afterFileInputRef}
+                          onChange={handleAfterImageChange}
+                          disabled={uploading}
+                          className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                            file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                            file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
+                            hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
+                            file:shadow-lg hover:file:shadow-xl"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                          Upload image showing area after cleanup (max 10MB)
+                        </p>
+                      </div>
+                      {errors.afterImage && (
+                        <p className="text-red-500 text-sm flex items-center">
+                          <span className="text-red-400 mr-1">⚠️</span>
+                          {errors.afterImage}
+                        </p>
+                      )}
+                      {afterImage && (
+                        <div className="mt-2">
+                          <img
+                            src={URL.createObjectURL(afterImage)}
+                            alt="After cleanup"
+                            className="w-full h-48 object-cover rounded-xl shadow-md"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Upload Media
+                    </label>
+                    <div
+                      className={`border-2 border-dashed ${
+                        errors.media ? "border-red-400" : "border-gray-300"
+                      } 
+                      rounded-2xl p-6 bg-gray-50 hover:border-green-400 transition-all duration-200`}
+                    >
+                      <input
+                        type="file"
+                        accept={category === "Tree Plantation" ? "video/*" : "image/*,video/*"}
+                        multiple
+                        ref={fileInputRef}
+                        onChange={handleMediaChange}
+                        disabled={uploading}
+                        className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6
+                          file:rounded-xl file:border-0 file:text-sm file:font-semibold
+                          file:bg-gradient-to-r file:from-green-500 file:to-emerald-500 file:text-white
+                          hover:file:from-green-600 hover:file:to-emerald-600 file:transition-all file:duration-200
+                          file:shadow-lg hover:file:shadow-xl"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        {category === "Tree Plantation" 
+                          ? "🎥 Upload videos only (max 10MB each)" 
+                          : "📷 Upload up to 4 images or videos (max 10MB each)"}
+                      </p>
+                    </div>
+                    {errors.media && (
+                      <p className="text-red-500 text-sm flex items-center">
+                        <span className="text-red-400 mr-1">⚠️</span>
+                        {errors.media}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {media.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-700">Media Preview:</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {media.map((f, idx) => {
+                        const url = URL.createObjectURL(f);
+                        return (
+                          <div key={idx} className="relative group">
+                            {f.type.startsWith("video/") ? (
+                              <video
+                                src={url}
+                                className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
+                              />
+                            ) : (
+                              <img
+                                src={url}
+                                className="w-full h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
+                              />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeMedia(idx)}
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 
+                                opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-110"
+                            >
+                              <span className="text-xs font-bold">✕</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Uploading...</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 ease-out shadow-sm"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className={`w-full py-4 rounded-2xl text-xl font-bold text-white shadow-lg transform transition-all duration-200
+                    ${
+                      uploading
+                        ? "bg-gray-400 cursor-not-allowed scale-100"
+                        : "bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 hover:shadow-xl active:scale-95"
+                    }
+                  `}
+                >
+                  {uploading ? (
+                    <span className="flex items-center justify-center">
+                      <span className="animate-spin mr-2">⏳</span>
+                      Uploading {progress}%...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      <span className="mr-2">🚀</span>
+                      Log Activity
+                    </span>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Right Column - Recent Activities (1/3 width) */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100 p-6 sticky top-24">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  📜 Recent Activities
+                </h3>
+                <p className="text-sm text-gray-600">Last 3 activities</p>
+              </div>
+
+              {logs.length > 0 ? (
+                <div className="space-y-4">
+                  {[...logs].reverse().slice(0, 3).map((log) => (
+                    <div
+                      key={log._id}
+                      className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 
+                      rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-12 h-12">
+                          {log.media?.length > 0 ? (
+                            <div className="relative">
+                              {isVideo(log.media[0]) ? (
+                                <video
+                                  src={log.media[0]}
+                                  className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                                />
+                              ) : (
+                                <img
+                                  src={log.media[0]}
+                                  alt="activity thumbnail"
+                                  className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center text-xl">
+                              🌱
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-gray-900 truncate text-left">
                             {log.category}
                           </h4>
-                          <span className="text-gray-500 text-sm">
-                            🕒 {formatDate(log.logTime)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-2 ml-10 text-start">
-                          <p className="text-sm text-gray-600 mt-2">
-                            Status:{" "}
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-2 text-left">
+                            {log.description}
+                          </p>
+                          <div className="flex items-center justify-between text-xs text-left">
                             <span
                               className={`font-semibold ${
                                 log.Status === "Approved"
@@ -760,79 +811,39 @@ const ActivityLogPage = () => {
                                   : "text-yellow-600"
                               }`}
                             >
-                              {log.Status || "pending"}
+                              {log.Status || "Pending"}
                             </span>
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Points Awarded:{" "}
-                            <span className="font-bold">
-                              {log.points ?? "Pending"}
+                            <span className="text-gray-500">
+                              {log.points ?? "..."} pts
                             </span>
-                          </p>
+                          </div>
                         </div>
                       </div>
-
-                      <p className="text-gray-700 mb-3 leading-relaxed">
-                        {log.description}
-                      </p>
-
-                      {log.category === "Sustainable Commute" &&
-                        log.modelOutput?.total_distance_km !== undefined && (
-                          <p className="text-sm text-blue-700 font-semibold mt-1">
-                            🚶 Total Distance Walked:{" "}
-                            <span className="text-blue-900">
-                              {log.modelOutput.total_distance_km.toFixed(2)} km
-                            </span>
-                          </p>
-                        )}
-
-                      {log.media?.length > 1 && (
-                        <div
-                          className={`grid gap-2 mt-4 ${
-                            log.media.length === 2
-                              ? "grid-cols-2"
-                              : log.media.length === 3
-                              ? "grid-cols-3"
-                              : "grid-cols-2"
-                          }`}
-                        >
-                          {log.media
-                            .slice(1)
-                            .map((url, idx) =>
-                              isVideo(url) ? (
-                                <video
-                                  key={idx}
-                                  src={url}
-                                  controls
-                                  className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow"
-                                />
-                              ) : (
-                                <img
-                                  key={idx}
-                                  src={url}
-                                  alt="activity media"
-                                  className="w-full h-32 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                                />
-                              )
-                            )}
-                        </div>
-                      )}
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-3">🌱</div>
+                  <p className="text-gray-600 text-sm">
+                    No activities yet.
+                  </p>
+                  <p className="text-gray-500 text-xs mt-1">
+                    Start logging above!
+                  </p>
+                </div>
+              )}
+
+              {logs.length > 3 && (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all text-sm"
+                >
+                  View All Activities →
+                </button>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🌱</div>
-              <p className="text-gray-600 text-lg mb-2">
-                No activities logged yet.
-              </p>
-              <p className="text-gray-500">
-                Start your eco-journey by logging your first activity above!
-              </p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

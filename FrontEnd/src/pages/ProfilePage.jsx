@@ -205,7 +205,15 @@ const ProfilePage = () => {
                                             {log.description}
                                         </p>
                                         <div className="flex items-center justify-between text-xs text-gray-500">
-                                            <span>🌱 Verified</span>
+                                            <span className={`font-semibold ${
+                                                log.Status === 'Approved' 
+                                                    ? 'text-green-600' 
+                                                    : log.Status === 'Rejected' 
+                                                    ? 'text-red-500' 
+                                                    : 'text-yellow-600'
+                                            }`}>
+                                                {log.Status === 'Approved' ? '✅ Approved' : log.Status === 'Rejected' ? '❌ Rejected' : '⏳ Pending'}
+                                            </span>
                                             <span>{new Date(log.createdAt).toLocaleDateString()}</span>
                                         </div>
                                     </div>
