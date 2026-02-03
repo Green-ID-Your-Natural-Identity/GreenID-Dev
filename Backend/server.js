@@ -11,6 +11,7 @@ import sessionMiddleware from './config/sessionConfig.js';
 
 // Initialize app
 const app = express();
+app.set('trust proxy', 1); // ✅ Required for Render/Vercel (Secure Cookies)
 dotenv.config(); // Load environment variables from .env
 
 // Middlewares
