@@ -15,7 +15,10 @@ dotenv.config(); // Load environment variables from .env
 
 // Middlewares
 app.use(cors({
-    origin: 'http://localhost:5173', // or wherever your frontend runs
+    origin: [
+        'http://localhost:5173', 
+        process.env.FRONTEND_URL // Add your Vercel URL in Render Environment Variables
+    ].filter(Boolean),
     credentials: true
 }));            // Allow frontend to access backend
 app.use(express.json());    // Allow backend to read JSON data from requests

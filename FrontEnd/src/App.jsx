@@ -33,7 +33,7 @@ function App() {
         {/* 🌱 User Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<LandingPage />} />
+        <Route path="/home" element={<ProfilePage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/form" element={<ProfileForm />} />
         <Route path="/profile" element={<ProfilePage />} />
