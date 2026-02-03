@@ -77,16 +77,20 @@ An intelligent chatbot powered by Google's Gemini AI to assist users with green 
 ### **Further UI is still in developing stage**
 
 - ### **Login**
-  <img width="753" height="753" alt="image" src="https://github.com/user-attachments/assets/22b732de-fa93-4b06-ba47-615f83b0fcc9" />
+  <img width="1919" height="926" alt="image" src="https://github.com/user-attachments/assets/927cacaa-ac0b-4ef1-8622-753a7edf8b52" />
 
 - ### **Profile**
-  <img width="1131" height="751" alt="image" src="https://github.com/user-attachments/assets/43ff4d3c-ca46-4aba-afd7-7b0034443d16" />
+  <img width="1915" height="918" alt="image" src="https://github.com/user-attachments/assets/254aa81f-5149-43f1-be69-0304c09775a0" />
+  <img width="1911" height="698" alt="image" src="https://github.com/user-attachments/assets/20fafa6d-5c80-4ed4-bc1e-bc0931fefb9b" />
+  
 - ### **Activity-Log**
-  <img width="1066" height="905" alt="image" src="https://github.com/user-attachments/assets/b52ccb7e-919c-4202-95f4-c1b6682f12be" />
-  <img width="1222" height="377" alt="image" src="https://github.com/user-attachments/assets/f2739514-444b-4658-a9b9-680e01a6a443" />
+  <img width="1917" height="924" alt="image" src="https://github.com/user-attachments/assets/ea4ce390-f279-4303-b977-ef2397dc4770" />
+- ### **Hari Kaka (Chatbot to resolve doubts)**
+  <img width="1919" height="927" alt="image" src="https://github.com/user-attachments/assets/659e7437-bc16-4b8e-9699-83624beceaeb" />
 - ### **Admin-Panel**
   <img width="1598" height="907" alt="image" src="https://github.com/user-attachments/assets/c46b51b5-190b-491f-a80c-84f74c5e69a8" />
   <img width="1600" height="911" alt="image" src="https://github.com/user-attachments/assets/d8556a3e-9100-4516-8dff-66a1d2ca86a8" />
+  <img width="1602" height="929" alt="image" src="https://github.com/user-attachments/assets/d43c8b5f-6b12-403f-a460-29da616fa830" />
 
 ## ⚙️ Setup & Installation
 
