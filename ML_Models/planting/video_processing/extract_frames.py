@@ -24,6 +24,13 @@ def extract_frames(video_path, out_dir="uploads/frames", sample_fps=1, max_frame
         if not ret:
             break
         if idx % step == 0:
+            # Resize frame to max width 640 for faster I/O and downstream processing
+            h, w = frame.shape[:2]
+            if w > 640:
+                new_w = 640
+                new_h = int(h * (640 / w))
+                frame = cv2.resize(frame, (new_w, new_h))
+            
             fname = Path(out_dir) / f"frame_{saved:05d}.jpg"
             cv2.imwrite(str(fname), frame)
             frame_paths.append(str(fname))

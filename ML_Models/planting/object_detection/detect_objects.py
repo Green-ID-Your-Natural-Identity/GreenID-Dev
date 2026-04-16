@@ -21,6 +21,8 @@ try:
 except Exception:
     ULTRALYTICS_AVAILABLE = False
 
+_GLOBAL_MODEL_CACHE = {}
+
 class Detector:
     """
     Wrapper: tries YOLO (ultralytics) if available, otherwise model=None.
@@ -31,10 +33,12 @@ class Detector:
         self.conf = conf
         self.device = device
         self.model = None
+        global _GLOBAL_MODEL_CACHE, YOLO_LOAD_OK
         if ULTRALYTICS_AVAILABLE:
             try:
-                self.model = YOLO(model_path)
-                global YOLO_LOAD_OK
+                if model_path not in _GLOBAL_MODEL_CACHE:
+                    _GLOBAL_MODEL_CACHE[model_path] = YOLO(model_path)
+                self.model = _GLOBAL_MODEL_CACHE[model_path]
                 YOLO_LOAD_OK = True
             except Exception:
                 self.model = None

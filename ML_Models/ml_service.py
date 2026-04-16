@@ -301,7 +301,14 @@ def _predict_transport_image(img_path: str) -> dict:
     img_array = preprocess_input(img_array)
     img_array = img_array[None, ...]          # add batch dim
 
-    predictions = model.predict(img_array, verbose=0)
+    # Call model directly which is faster than model.predict for batch size 1
+    tensor_preds = model(img_array, training=False)
+    
+    # Handle both Keras Sequential/Model outputs and raw dictionary outputs (from some SavedModels)
+    if isinstance(tensor_preds, dict):
+        predictions = list(tensor_preds.values())[0].numpy()
+    else:
+        predictions = tensor_preds.numpy()
     predicted_index = int(predictions.argmax())
     confidence = float(predictions.max())
 
