@@ -131,7 +131,7 @@ export default function UserProfiles() {
 
 
   return (
-    <div className="max-w-[100vw] p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
         <p className="text-gray-600">View all registered users and their complete activity details</p>

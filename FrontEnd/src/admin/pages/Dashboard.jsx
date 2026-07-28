@@ -36,7 +36,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black p-6">
+    <div className="text-black">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">🌿 Admin Dashboard</h1>
         <button
